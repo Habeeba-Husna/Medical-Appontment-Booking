@@ -22,7 +22,10 @@ const generateRefreshToken = (user) => {
 
 // Register Patient
 export const registerPatient = async (req, res) => {
+  console.log("in controller pati.................")
+  console.log(req.body,"req body........")
   const { fullName, email, phoneNumber, password, age, gender, medicalHistory } = req.body;
+  console.log(fullName,email,phoneNumber,password,age,gender,medicalHistory)
   try {
     const existingPatient = await Patient.findOne({ email });
     if (existingPatient) return res.status(400).json({ message: 'Patient already exists' });
@@ -38,36 +41,54 @@ export const registerPatient = async (req, res) => {
   }
 };
 
-// Register Doctor
+
 export const registerDoctor = async (req, res) => {
-  const { fullName, email, phoneNumber, password, specialization, experience, qualifications, clinicDetails, documents } = req.body;
+  console.log("Doctor Registration Started...");
+
+  const { fullName, email, phoneNumber, password, specialization, experience, qualifications, clinicDetails } = req.body;
+
+  let documentUrls = [];
+  console.log(req.files,"files...........")
+  if (req.files && req.files.length > 0) {
+    console.log("Files Received:", req.files);
+    documentUrls = req.files.map(file => file.path);
+  } else {
+    return res.status(400).json({
+      success: false,
+      message: 'Document upload failed. Please include valid documents.',
+    });
+  }
+console.log(documentUrls,"documentUrls.................")
   try {
     const existingDoctor = await Doctor.findOne({ email });
-    if (existingDoctor) return res.status(400).json({ message: 'Doctor already exists' });
+    if (existingDoctor) {
+      return res.status(400).json({ message: 'Doctor already exists' });
+    }
+
+    if (!password) {
+      return res.status(400).json({ message: 'Password is required' });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const doctor = await Doctor.create({
-      fullName, email, phoneNumber, password: hashedPassword, specialization, experience, qualifications, clinicDetails, documents
+      fullName,
+      email,
+      phoneNumber,
+      password: hashedPassword,
+      specialization,
+      experience,
+      qualifications,
+      clinicDetails,
+      documents: documentUrls,
     });
 
     res.status(201).json({ message: 'Doctor registered successfully, pending admin approval' });
   } catch (error) {
+    console.error("Error Registering Doctor:", error);
     res.status(500).json({ message: error.message });
   }
 };
-
-
-// // Generate Access Token
-// const generateAccessToken = (user) => {
-//   return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '15m' });
-// };
-
-// // Generate Refresh Token
-// const generateRefreshToken = (user) => {
-//   return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
-// };
-
-
 
 // Login
 

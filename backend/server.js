@@ -7,6 +7,8 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import otpRoutes from './routes/otpRoutes.js';
+import cors from 'cors';
+// const upload = multer({ dest: 'uploads/' });
 
 // import patientRoutes from './routes/patientRoutes.js';
 // import doctorRoutes from './routes/doctorRoutes.js';
@@ -18,8 +20,16 @@ connectDB();
 
 const app = express();
 app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
+
+// Enable CORS for frontend
+app.use(cors({
+    origin: 'http://localhost:5173', // Frontend URL
+    methods: ['POST', 'PUT', 'GET', 'OPTIONS', 'HEAD'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/otp', otpRoutes);
