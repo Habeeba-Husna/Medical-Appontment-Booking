@@ -12,7 +12,7 @@ import cors from 'cors';
 
 // import patientRoutes from './routes/patientRoutes.js';
 // import doctorRoutes from './routes/doctorRoutes.js';
-// import adminRoutes from './routes/adminRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 // import { notFound,errorHandler } from './middleware/errorMiddleware.js';
 
 dotenv.config();
@@ -36,7 +36,7 @@ app.use('/api/otp', otpRoutes);
 
 // app.use('/api/patients', patientRoutes);
 // app.use('/api/doctors',doctorRoutes);
-// app.use('/api/admin',adminRoutes);
+app.use('/api/admin',adminRoutes);
 
 
 // Error Handling Middleware

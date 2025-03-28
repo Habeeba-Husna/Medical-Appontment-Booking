@@ -5,27 +5,38 @@ import Doctor from '../models/doctorModel.js';
 import Admin from '../models/adminModel.js';
 import OTP from '../models/otpModel.js';
 import { sendEmail } from '../config/emailConfig.js';
-
-
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Generate Access Token
+// const generateAccessToken = (user) => {
+//   const role = user instanceof Patient ? 'patient' : user instanceof Doctor ? 'doctor' : 'admin';
+//   return jwt.sign({ id: user._id, role }, process.env.JWT_SECRET, { expiresIn: '15m' });
+// };
+
 const generateAccessToken = (user) => {
-  const role = user instanceof Patient ? 'Patient' : user instanceof Doctor ? 'Doctor' : 'Admin';
+  const role = user instanceof Admin ? 'admin' : user instanceof Patient ? 'patient' : 'doctor';
   return jwt.sign({ id: user._id, role }, process.env.JWT_SECRET, { expiresIn: '15m' });
 };
 
+
 // Generate Refresh Token
+// const generateRefreshToken = (user) => {
+//   const role = user instanceof Patient ? 'patient' : user instanceof Doctor ? 'doctor' : 'admin';
+//   return jwt.sign({ id: user._id, role }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+// };
+
 const generateRefreshToken = (user) => {
-  const role = user instanceof Patient ? 'Patient' : user instanceof Doctor ? 'Doctor' : 'Admin';
+  const role = user instanceof Admin ? 'admin' : user instanceof Patient ? 'patient' : 'doctor';
   return jwt.sign({ id: user._id, role }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 };
 
 // Register Patient
 export const registerPatient = async (req, res) => {
-  console.log("in controller pati.................")
-  console.log(req.body,"req body........")
+  // console.log("in controller pati.................")
+  // console.log(req.body,"req body........")
   const { fullName, email, phoneNumber, password, age, gender, medicalHistory } = req.body;
-  console.log(fullName,email,phoneNumber,password,age,gender,medicalHistory)
+  // console.log(fullName,email,phoneNumber,password,age,gender,medicalHistory)
   try {
     const existingPatient = await Patient.findOne({ email });
     if (existingPatient) return res.status(400).json({ message: 'Patient already exists' });
@@ -43,14 +54,14 @@ export const registerPatient = async (req, res) => {
 
 
 export const registerDoctor = async (req, res) => {
-  console.log("Doctor Registration Started...");
+  // console.log("Doctor Registration Started...");
 
   const { fullName, email, phoneNumber, password, specialization, experience, qualifications, clinicDetails } = req.body;
 
   let documentUrls = [];
-  console.log(req.files,"files...........")
+  // console.log(req.files,"files...........")
   if (req.files && req.files.length > 0) {
-    console.log("Files Received:", req.files);
+    // console.log("Files Received:", req.files);
     documentUrls = req.files.map(file => file.path);
   } else {
     return res.status(400).json({
@@ -58,7 +69,7 @@ export const registerDoctor = async (req, res) => {
       message: 'Document upload failed. Please include valid documents.',
     });
   }
-console.log(documentUrls,"documentUrls.................")
+// console.log(documentUrls,"documentUrls.................")
   try {
     const existingDoctor = await Doctor.findOne({ email });
     if (existingDoctor) {
@@ -135,7 +146,6 @@ export const refreshToken = async (req, res) => {
 };
 
 
-
 // Generate OTP Function
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -146,8 +156,13 @@ export const forgotPassword = async (req, res) => {
   try {
     const patient = await Patient.findOne({ email });
     const doctor = await Doctor.findOne({ email });
+    const admin = await Admin.findOne({ email });
 
-    const user = patient || doctor;
+    console.log("Patient:", patient);
+    console.log("Doctor:", doctor);
+    console.log("Admin:", admin);
+
+    const user = patient || doctor || admin;
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const otpCode = generateOTP();
@@ -185,8 +200,9 @@ export const resetPassword = async (req, res) => {
 
     const patient = await Patient.findOneAndUpdate({ email }, { password: hashedPassword });
     const doctor = await Doctor.findOneAndUpdate({ email }, { password: hashedPassword });
+    const admin = await Admin.findOneAndUpdate({ email }, { password: hashedPassword });
 
-    if (!patient && !doctor) {
+    if (!patient && !doctor && !admin) {
       return res.status(404).json({ message: 'User not found' });
     }
 
@@ -196,76 +212,49 @@ export const resetPassword = async (req, res) => {
   }
 };
 
-
-
 // Admin Login
+
 export const adminLogin = async (req, res) => {
   const { email, password } = req.body;
-  
+
+  console.log("Provided Email:", email);
+
   try {
     const admin = await Admin.findOne({ email });
-
-    if (!admin) return res.status(404).json({ message: 'Admin not found' });
-
-    const isPasswordValid = await bcrypt.compare(password, admin.password);
-    if (!isPasswordValid) return res.status(400).json({ message: 'Invalid credentials' });
-
-    const accessToken = generateAccessToken(admin);
-    const refreshToken = generateRefreshToken(admin);
-
-    res.status(200).json({ accessToken, refreshToken, role: 'Admin' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Admin Forgot Password - Send OTP
-export const adminForgotPassword = async (req, res) => {
-  const { email } = req.body;
-  
-  try {
-    const admin = await Admin.findOne({ email });
-    if (!admin) return res.status(404).json({ message: 'Admin not found' });
-
-    const otpCode = generateOTP();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
-
-    await OTP.create({ email, otpCode, expiresAt });
-
-    const subject = 'Admin Password Reset OTP';
-    const text = `Your OTP for password reset is: ${otpCode}. It is valid for 10 minutes.`;
-
-    await sendEmail(email, subject, text);
-
-    res.status(200).json({ message: 'OTP sent successfully' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Admin Reset Password using OTP
-export const adminResetPassword = async (req, res) => {
-  const { email, otpCode, newPassword } = req.body;
-
-  try {
-    const otpRecord = await OTP.findOne({ email, otpCode });
-
-    if (!otpRecord || otpRecord.expiresAt < new Date()) {
-      return res.status(400).json({ message: 'Invalid or expired OTP' });
-    }
-
-    await OTP.deleteOne({ email, otpCode });
-
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    const admin = await Admin.findOneAndUpdate({ email }, { password: hashedPassword });
 
     if (!admin) {
-      return res.status(404).json({ message: 'Admin not found' });
+      return res.status(404).json({ message: "Admin not found" });
     }
 
-    res.status(200).json({ message: 'Admin password reset successfully' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+    const isPasswordValid = await bcrypt.compare(password, admin.password);
+
+//     if (isPasswordValid) {
+//       const accessToken = jwt.sign(
+//         { role: 'Admin', email },
+//         process.env.JWT_SECRET,
+//         { expiresIn: '1h' }
+//       );
+
+//       return res.status(200).json({ accessToken, role: 'Admin', message: "Admin login successful" });
+//     } else {
+//       return res.status(401).json({ message: "Invalid password" });
+//     }
+//   } catch (error) {
+//     console.error('Admin login error:', error.message);
+//     return res.status(500).json({ message: "Internal server error" });
+//   }
+// };
+
+if (!isPasswordValid) {
+  return res.status(401).json({ message: "Invalid password" });
+}
+
+const accessToken = generateAccessToken(admin);
+const refreshToken = generateRefreshToken(admin);
+
+return res.status(200).json({ accessToken, refreshToken, role: 'admin', message: "Admin login successful" });
+} catch (error) {
+console.error('Admin login error:', error.message);
+return res.status(500).json({ message: "Internal server error" });
+}
 };
