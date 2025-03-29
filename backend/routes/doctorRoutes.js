@@ -1,5 +1,3 @@
-
-
 import express from 'express';
 import { protect,doctorProtect  } from '../middleware/authMiddleware.js';
 import { getDoctorProfile ,updateDoctorProfile} from '../controllers/doctorController.js';

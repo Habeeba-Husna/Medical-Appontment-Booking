@@ -1,5 +1,5 @@
 import OTP from '../models/otpModel.js';
-import { sendEmail } from '../config/emailConfig.js';
+import { sendNotification } from '../config/emailConfig.js';
 import Patient from '../models/patientModel.js';
 import Doctor from '../models/doctorModel.js';
 import crypto from 'crypto';
@@ -20,9 +20,9 @@ export const sendOTP = async (req, res) => {
     await OTP.create({ email, otpCode, expiresAt });
 
     const subject = 'Your OTP for Verification';
-    const text = `Your OTP for verification is: ${otpCode}. It is valid for 10 minutes.`;
+    const text = `<p>Your OTP for verification is: <strong>${otpCode}</strong>. It is valid for 10 minutes.</p>`;
 
-    await sendEmail(email, subject, text);
+    await sendNotification(email, subject, text);
 
     res.status(200).json({ message: 'OTP sent successfully' });
   } catch (error) {

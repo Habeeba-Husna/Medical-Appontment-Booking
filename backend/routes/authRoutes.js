@@ -14,8 +14,6 @@ import { registerPatient,
 
 const router = express.Router();
 
-
-
 // Patient and Doctor 
 
 router.post('/patient-register', registerPatient);

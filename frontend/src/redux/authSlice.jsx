@@ -75,7 +75,13 @@ const authSlice = createSlice({
     loading: false,
     error: null,
   },
-  reducers: {},
+  // reducers: {},
+  reducers: {
+    logoutUser: (state) => {
+      state.user = null;
+      localStorage.removeItem("token"); // Clear token from storage
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(registerUser.pending, (state) => {
@@ -90,9 +96,17 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      // .addCase(loginUser.fulfilled, (state, action) => {
+      //   state.user = action.payload;
+      // })
+
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.user = action.payload;
+        state.user = {
+          ...action.payload,
+          fullName: action.payload.fullName,
+        };
       })
+      
       .addCase(forgotPassword.fulfilled, (state) => {
         state.loading = false;
       })
@@ -115,4 +129,5 @@ const authSlice = createSlice({
   },
 });
 
+export const { logoutUser } = authSlice.actions;
 export default authSlice.reducer;

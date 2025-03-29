@@ -12,17 +12,18 @@ const transporter = nodemailer.createTransport({
 });
 
 // Send Email Function
-export const sendEmail = async (to, subject, text) => {
+export const sendNotification = async (to, subject, text) => {
   try {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to,
       subject,
-      text,
+      html: `<p>${text}</p>`,
+      // text,
     };
 
     await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully');
+    console.log('Email sent:', {to,subject,status: 'Success'});
   } catch (error) {
     console.error('Error sending email:', error);
     throw new Error('Email sending failed');

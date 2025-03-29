@@ -10,7 +10,6 @@ import { ENDPOINTS } from "./endPoints";
 //   },
 // });
 
-
 const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
   });
@@ -25,7 +24,7 @@ const axiosInstance = axios.create({
   });
   
 
-axiosInstance.interceptors.request.use(
+ axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
     if (token) {

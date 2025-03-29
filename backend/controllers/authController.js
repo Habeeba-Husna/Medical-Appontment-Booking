@@ -4,27 +4,18 @@ import Patient from '../models/patientModel.js';
 import Doctor from '../models/doctorModel.js';
 import Admin from '../models/adminModel.js';
 import OTP from '../models/otpModel.js';
-import { sendEmail } from '../config/emailConfig.js';
+import { sendNotification } from '../config/emailConfig.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
 // Generate Access Token
-// const generateAccessToken = (user) => {
-//   const role = user instanceof Patient ? 'patient' : user instanceof Doctor ? 'doctor' : 'admin';
-//   return jwt.sign({ id: user._id, role }, process.env.JWT_SECRET, { expiresIn: '15m' });
-// };
 
 const generateAccessToken = (user) => {
   const role = user instanceof Admin ? 'admin' : user instanceof Patient ? 'patient' : 'doctor';
   return jwt.sign({ id: user._id, role }, process.env.JWT_SECRET, { expiresIn: '15m' });
 };
 
-
 // Generate Refresh Token
-// const generateRefreshToken = (user) => {
-//   const role = user instanceof Patient ? 'patient' : user instanceof Doctor ? 'doctor' : 'admin';
-//   return jwt.sign({ id: user._id, role }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
-// };
 
 const generateRefreshToken = (user) => {
   const role = user instanceof Admin ? 'admin' : user instanceof Patient ? 'patient' : 'doctor';
@@ -32,8 +23,9 @@ const generateRefreshToken = (user) => {
 };
 
 // Register Patient
+
 export const registerPatient = async (req, res) => {
-  // console.log("in controller pati.................")
+  // console.log("in controller parti.................")
   // console.log(req.body,"req body........")
   const { fullName, email, phoneNumber, password, age, gender, medicalHistory } = req.body;
   // console.log(fullName,email,phoneNumber,password,age,gender,medicalHistory)
@@ -101,8 +93,8 @@ export const registerDoctor = async (req, res) => {
   }
 };
 
-// Login
 
+// Login
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -116,12 +108,17 @@ export const loginUser = async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) return res.status(400).json({ message: 'Invalid credentials' });
 
-    // const role = patient ? 'Patient' : doctor ? 'Doctor' : 'Admin';
-    
+    const role = patient ? 'Patient' : doctor ? 'Doctor' : 'Admin';
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    res.status(200).json({ accessToken, refreshToken, role: patient ? 'Patient' : doctor ? 'Doctor' : 'Admin' });
+    // Return user's fullName along with tokens
+    res.status(200).json({ 
+      accessToken, 
+      refreshToken, 
+      role, 
+      fullName: user.fullName 
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -158,24 +155,23 @@ export const forgotPassword = async (req, res) => {
     const doctor = await Doctor.findOne({ email });
     const admin = await Admin.findOne({ email });
 
-    console.log("Patient:", patient);
-    console.log("Doctor:", doctor);
-    console.log("Admin:", admin);
+    // console.log("Patient:", patient);
+    // console.log("Doctor:", doctor);
+    // console.log("Admin:", admin);
 
     const user = patient || doctor || admin;
     if (!user) return res.status(404).json({ message: 'User not found' });
 
+    await OTP.deleteMany({ email }); // Remove existing OTP 
+
     const otpCode = generateOTP();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // Valid for 10 minutes
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); 
 
-    // Save OTP to the database
-    await OTP.create({ email, otpCode, expiresAt });
+    await OTP.create({ email, otpCode, expiresAt }); // Save OTP to the database
+    const subject = 'Password Reset OTP'; // Send OTP via email
+    const text = `<p>Your OTP for password reset is: <strong>${otpCode}</strong>. It is valid for 10 minutes.</p>`;
 
-    // Send OTP via email
-    const subject = 'Password Reset OTP';
-    const text = `Your OTP for password reset is: ${otpCode}. It is valid for 10 minutes.`;
-
-    await sendEmail(email, subject, text);
+    await sendNotification(email, subject, text);
 
     res.status(200).json({ message: 'OTP sent successfully' });
   } catch (error) {
@@ -217,7 +213,7 @@ export const resetPassword = async (req, res) => {
 export const adminLogin = async (req, res) => {
   const { email, password } = req.body;
 
-  console.log("Provided Email:", email);
+  // console.log("Provided Email:", email);
 
   try {
     const admin = await Admin.findOne({ email });
@@ -228,25 +224,8 @@ export const adminLogin = async (req, res) => {
 
     const isPasswordValid = await bcrypt.compare(password, admin.password);
 
-//     if (isPasswordValid) {
-//       const accessToken = jwt.sign(
-//         { role: 'Admin', email },
-//         process.env.JWT_SECRET,
-//         { expiresIn: '1h' }
-//       );
-
-//       return res.status(200).json({ accessToken, role: 'Admin', message: "Admin login successful" });
-//     } else {
-//       return res.status(401).json({ message: "Invalid password" });
-//     }
-//   } catch (error) {
-//     console.error('Admin login error:', error.message);
-//     return res.status(500).json({ message: "Internal server error" });
-//   }
-// };
-
 if (!isPasswordValid) {
-  return res.status(401).json({ message: "Invalid password" });
+  return res.status(401).json({ message:"Invalid password" });
 }
 
 const accessToken = generateAccessToken(admin);

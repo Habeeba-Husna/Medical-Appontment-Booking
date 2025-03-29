@@ -1,61 +1,3 @@
-
-
-// import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-// import axiosInstance from '../api/axiosInstance';
-
-// // Admin Login
-// export const adminLogin = createAsyncThunk('auth/adminLogin', async (credentials, { rejectWithValue }) => {
-//   try {
-//     const response = await axiosInstance.post('/auth/admin-login', credentials);
-//     localStorage.setItem('token', response.data.token);
-//     return response.data;
-//   } catch (error) {
-//     return rejectWithValue(error.response?.data?.message || 'Invalid credentials');
-//   }
-// });
-
-// // Patient Registration
-// export const registerPatient = createAsyncThunk('auth/registerPatient', async (userData, { rejectWithValue }) => {
-//   try {
-//     const response = await axiosInstance.post('/auth/patient-register', userData);
-//     return response.data;
-//   } catch (error) {
-//     return rejectWithValue(error.response?.data?.message || 'Something went wrong');
-//   }
-// });
-
-// // Doctor Registration
-// export const registerDoctor = createAsyncThunk('auth/registerDoctor', async (userData, { rejectWithValue }) => {
-//   try {
-//     const response = await axiosInstance.post('/auth/doctor-register', userData);
-//     return response.data;
-//   } catch (error) {
-//     return rejectWithValue(error.response?.data?.message || 'Something went wrong');
-//   }
-// });
-
-// // Forgot Password
-// export const forgotPassword = createAsyncThunk('auth/forgotPassword', async (email, { rejectWithValue }) => {
-//   try {
-//     const response = await axiosInstance.post('/auth/forgot-password', { email });
-//     return response.data;
-//   } catch (error) {
-//     return rejectWithValue(error.response?.data?.message || 'Error sending OTP');
-//   }
-// });
-
-// // Reset Password
-// export const resetPassword = createAsyncThunk('auth/resetPassword', async (data, { rejectWithValue }) => {
-//   try {
-//     const response = await axiosInstance.post('/auth/reset-password', data);
-//     return response.data;
-//   } catch (error) {
-//     return rejectWithValue(error.response?.data?.message || 'Password reset failed');
-//   }
-// });
-
-
-
 export const ENDPOINTS = {
   AUTH: {
     LOGIN: "/auth/login",
@@ -68,4 +10,42 @@ export const ENDPOINTS = {
     REFRESH_TOKEN: "/auth/refresh-token",
     ME: "/auth/me",   //current logged-in user (Patient/Doctor/Admin)
   },
+  PATIENT: {
+    DOCTORS_LIST: "/patient/doctors",
+    BOOK_APPOINTMENT: "/patient/book-appointment",
+    APPOINTMENTS: "/patient/appointments",
+    NOTIFICATIONS: "/patient/notifications",
+  },
+  DOCTOR: {
+    PROFILE: "/doctor/profile",
+    UPDATE_PROFILE: "/doctor/profile",
+  },
+
+  ADMIN: {
+    // Doctor Management
+    VERIFY_DOCTOR: (id) => `/admin/verify-doctor/${id}`,
+    APPROVE_DOCTOR: (id) => `/admin/approve-doctor/${id}`,
+    DELETE_DOCTOR: (id) => `/admin/delete-doctor/${id}`,
+    GET_ALL_DOCTORS: "/admin/doctors",
+
+    // Patient Management
+    GET_ALL_PATIENTS: "/admin/patients",
+    DELETE_PATIENT: (id) => `/admin/delete-patients/${id}`,
+    BLOCK_PATIENT: (id) => `/admin/block-patient/${id}`,
+    UNBLOCK_PATIENT: (id) => `/admin/unblock-patient/${id}`,
+
+    // Appointment Management
+    GET_ALL_APPOINTMENTS: "/admin/appointments",
+    UPDATE_APPOINTMENT_STATUS: (id) => `/admin/appointments/${id}`,
+    DELETE_APPOINTMENT: (id) => `/admin/appointments/${id}`,
+
+    // Reports and Analytics
+    GET_REPORTS: "/admin/reports",
+
+    // Dispute Management
+    RAISE_DISPUTE: "/admin/dispute",
+    RESOLVE_DISPUTE: (id) => `/admin/dispute/${id}`,
+    GET_ALL_DISPUTES: "/admin/disputes",
+  },
 };
+

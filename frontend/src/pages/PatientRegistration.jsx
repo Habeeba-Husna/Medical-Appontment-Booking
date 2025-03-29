@@ -132,8 +132,8 @@ const PatientRegistration = () => {
                 maxLength={10}
                 required 
                 pattern="\d*"  
-                className="inputField"
-                // className="bg-white text-black rounded-md w-full p-4 pl-12 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
+                // className="inputField"
+                className="bg-white text-black rounded-md w-full p-4 pl-12 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
               />
               {errors.phoneNumber && <p className="text-red-500 text-sm mt-2">{errors.phoneNumber}</p>}
              
