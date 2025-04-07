@@ -1,6 +1,6 @@
 import express from 'express';
 import { createAppointment ,getAppointmentsByPatient} from '../controllers/appointmentController.js';
-import { getAllDoctors } from '../controllers/doctorController.js';
+import { getAllDoctors, getDoctorById } from '../controllers/doctorController.js';
 import { authenticatePatient } from '../middleware/authMiddleware.js';
 // import { protect,patientProtect  } from '../middleware/authMiddleware.js';
 // import { getPatientProfile,updatePatientProfile } from '../controllers/patientController.js';
@@ -10,6 +10,10 @@ const router = express.Router();
 router.post('/appointments', authenticatePatient, createAppointment);
 router.get('/get-appointments', authenticatePatient, getAppointmentsByPatient);
 router.get('/doctors', authenticatePatient, getAllDoctors);
+router.get('/doctors/:id', authenticatePatient, getDoctorById);
+// router.get('/doctors', getAllDoctors);
+
+  
 
 
 // router.get('/profile', protect, patientProtect, getPatientProfile);

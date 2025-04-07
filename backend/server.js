@@ -31,6 +31,7 @@ app.use('/api/otp', otpRoutes);
 app.use('/api/admin',adminRoutes);
 app.use('/api/patient', patientRoutes);
 app.use('/api', notificationRoutes);
+// app.use('/api', doctorRoutes);
 
 
 // app.use(errorHandler);

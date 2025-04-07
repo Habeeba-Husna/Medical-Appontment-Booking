@@ -10,15 +10,18 @@ export const ENDPOINTS = {
     REFRESH_TOKEN: "/auth/refresh-token",
     ME: "/auth/me",   //current logged-in user (Patient/Doctor/Admin)
   },
-  PATIENT: {
-    DOCTORS_LIST: "/patient/doctors",
-    BOOK_APPOINTMENT: "/patient/book-appointment",
-    APPOINTMENTS: "/patient/appointments",
-    NOTIFICATIONS: "/patient/notifications",
-  },
+    PATIENT: {
+      DOCTORS_LIST: '/patient/doctors',
+      APPOINTMENTS: '/patient/appointments',
+      NOTIFICATIONS: '/patient/notifications',
+      SINGLE_DOCTOR: (id) => `/doctors/${id}`,
+      BOOK_APPOINTMENT: '/patient/appointments', 
+      CANCEL_APPOINTMENT: '/patient/appointments/cancel',
+    },
   DOCTOR: {
     PROFILE: "/doctor/profile",
     UPDATE_PROFILE: "/doctor/profile",
+    
   },
 
   ADMIN: {

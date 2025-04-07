@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser, adminLogin } from '../redux/authSlice';
+import { loginUser, adminLogin } from '../store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { Stethoscope, User, Shield } from 'lucide-react';
 
@@ -23,25 +23,46 @@ const Login = () => {
       return;
     }
   
-    try {
-      if (role === 'Admin') {
-        await dispatch(adminLogin({ email, password })).unwrap();
-        navigate('/dashboard3');
-      } else {
-        await dispatch(loginUser({ email, password, role })).unwrap();
+  //   try {
+  //     if (role === 'Admin') {
+  //       await dispatch(adminLogin({ email, password })).unwrap();
+  //       navigate('/dashboard3');
+  //     } else {
+  //       await dispatch(loginUser({ email, password, role })).unwrap();
         
         
-        if (role === 'Patient') {
-          navigate('/dashboard1'); 
-        } else if (role === 'Doctor') {
-          navigate('/dashboard2'); 
-        }
-      }
-    } catch (err) {
-      setError(loginError || 'Login failed. Please try again.');
-    }
-  };
+  //       if (role === 'Patient') {
+  //         navigate('/dashboard1'); 
+  //       } else if (role === 'Doctor') {
+  //         navigate('/dashboard2'); 
+  //       }
+  //     }
+  //   } catch (err) {
+  //     setError(loginError || 'Login failed. Please try again.');
+  //   }
+  // };
   
+  try {
+    let response;
+    if (role === 'Admin') {
+      response = await dispatch(adminLogin({ email, password })).unwrap();
+      navigate('/dashboard3');
+    } else {
+      response = await dispatch(loginUser({ email, password, role })).unwrap();
+      console.log('Navigation Triggered for:', response.role);
+      navigate(role === 'Patient' ? '/dashboard1' : '/dashboard2');
+      console.log(role)
+      console.log(email,password)
+      console.log(response,"asdfghj...................")
+    }
+  } catch (err) {
+    setError(err?.message || 'Login failed. Please try again.');
+  }
+  };
+  const authState = useSelector(state => state.auth);
+// console.log(authState,"habeebass login sucess");
+
+
 
   const roleOptions = [
     { label: 'Patient', icon: <User className="w-6 h-6 text-blue-600" />, color: 'blue' },

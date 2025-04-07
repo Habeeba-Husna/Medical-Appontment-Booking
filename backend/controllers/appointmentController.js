@@ -9,13 +9,21 @@ import { sendNotification } from '../config/emailConfig.js';
 export const createAppointment = async (req, res) => {
     try {
       const { doctorId, date, time, status } = req.body;
-      const patientId = req.user._id;                        // Direct fetch frm authntictd user
-  
+      // const patientId = req.user._id;                        // Direct fetch frm authntictd user
+      console.log("req.patient:", req.patient);
+      console.log("doctorId:", doctorId);
+console.log("date:", date);
+console.log("time:", time);
+       
+      const patientId = req.patient._id;
+
       if (!doctorId || !date || !time) {
         return res.status(400).json({ message: 'DoctorId, date, and time are required' });
       }
   
       const doctor = await Doctor.findById(doctorId);
+      
+
       if (!doctor) {
         return res.status(404).json({ message: 'Doctor not found' });
       }

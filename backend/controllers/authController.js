@@ -38,7 +38,16 @@ export const registerPatient = async (req, res) => {
       fullName, email, phoneNumber, password: hashedPassword, age, gender, medicalHistory
     });
 
-    res.status(201).json({ message: 'Patient registered successfully' });
+    res.status(201).json({ message: 'Patient registered successfully',
+      Patient: {
+        id: Patient._id,
+        fullName: Patient.fullName,
+        email: Patient.email,
+        specialization: Patient.age,
+        isVerified: Patient.gender,
+        isApproved: Patient.medicalHistory
+      }
+     });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -74,6 +83,7 @@ export const registerDoctor = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+
     const doctor = await Doctor.create({
       fullName,
       email,
@@ -84,9 +94,22 @@ export const registerDoctor = async (req, res) => {
       qualifications,
       clinicDetails,
       documents: documentUrls,
+      isVerified: false,
+      isApproved: false,
+      isProfileComplete: false,
     });
 
-    res.status(201).json({ message: 'Doctor registered successfully, pending admin approval' });
+    res.status(201).json({ message: 'Doctor registered successfully, pending admin approval',
+      doctor: {
+        id: doctor._id,
+        fullName: doctor.fullName,
+        email: doctor.email,
+        specialization: doctor.specialization,
+        isVerified: doctor.isVerified,
+        isApproved: doctor.isApproved,
+        isProfileComplete: doctor.isProfileComplete,
+      }
+     });
   } catch (error) {
     console.error("Error Registering Doctor:", error);
     res.status(500).json({ message: error.message });
@@ -117,7 +140,8 @@ export const loginUser = async (req, res) => {
       accessToken, 
       refreshToken, 
       role, 
-      fullName: user.fullName 
+      fullName: user.fullName ,
+      id: user._id
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

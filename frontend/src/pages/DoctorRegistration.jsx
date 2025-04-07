@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { registerUser } from "../redux/authSlice";
+import { registerUser } from "../store/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 
 
@@ -45,6 +45,26 @@ const DoctorRegistration = () => {
       setFormData({ ...formData, [name]: value });
     }
   };
+
+  // const handleChange = (e) => {
+  //   const { name, value, files } = e.target;
+  
+  //   if (name === "documents") {
+  //     setFormData({ ...formData, documents: files });
+  //   } else if (name.startsWith("clinicDetails.")) {
+  //     const field = name.split(".")[1];
+  //     setFormData(prev => ({
+  //       ...prev,
+  //       clinicDetails: {
+  //         ...prev.clinicDetails,
+  //         [field]: value
+  //       }
+  //     }));
+  //   } else {
+  //     setFormData({ ...formData, [name]: value });
+  //   }
+  // };
+  
 
   const handleBlur = (e) => {
     const { name, value } = e.target;
@@ -97,6 +117,15 @@ const DoctorRegistration = () => {
         data.append(key, value);
       }
     });
+
+  //    // Append all non-file fields
+  // Object.entries(formData).forEach(([key, value]) => {
+  //   if (key === "clinicDetails") {
+  //     data.append("clinicDetails", JSON.stringify(value));
+  //   } else if (key !== "documents") {
+  //     data.append(key, value);
+  //   }
+  // });
   
     // Append files
     if (formData.documents && formData.documents.length > 0) {
