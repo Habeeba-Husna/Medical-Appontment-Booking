@@ -55,7 +55,7 @@ const Navbar = () => {
                   </Button>
                 </Link>
                 <Link to="/register">
-                  <Button className="bg-medical-primary hover:bg-medical-secondary">
+                  <Button className="bg-medical-primary text-white  hover:bg-medical-secondary">
                     Sign Up
                   </Button>
                 </Link>

@@ -3,7 +3,9 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance, { ENDPOINTS } from '../api/axiosInstance';
+// import axiosInstance, { ENDPOINTS } from '../api/axiosInstance';
+import axiosInstance from "../api/axiosInstance";
+import { ENDPOINTS } from "../api/endPoints";
 
 const ResetPassword = () => {
   const navigate = useNavigate();

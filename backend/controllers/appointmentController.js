@@ -107,13 +107,34 @@ export const updateAppointmentStatus = async (req, res) => {
   };
 
 
+  // export const getAppointmentsByPatient = async (req, res) => {
+  //   try {
+  //     const userId = req.user._id; // Use req.user._id instead of req.user.id
+  //     const appointments = await Appointment.find({ patientId: userId })
+  //     .populate("doctorId", "fullName email specialization experience");
+  //     res.status(200).json(appointments);
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // };
+  
+
+  
   export const getAppointmentsByPatient = async (req, res) => {
     try {
-      const userId = req.user._id; // Use req.user._id instead of req.user.id
-      const appointments = await Appointment.find({ patientId: userId });
+      console.log(" Reached getAppointmentsByPatient controller");
+      console.log("req...",req.id)
+      const patientId = req.patient._id;
+  
+      const rawAppointments = await Appointment.find({ patientId });
+      console.log("🔍 Raw appointments:", rawAppointments); 
+  
+      const appointments = await Appointment.find({ patientId })
+        .populate("doctorId", "fullName email specialization experience");
+  console.log(appointments,"asdfghjkl..........................");
       res.status(200).json(appointments);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error(" Full error fetching appointments:", error);
+      res.status(500).json({ message: "Failed to fetch appointments" });
     }
   };
-  

@@ -1,234 +1,337 @@
-// import { createSlice } from '@reduxjs/toolkit';
+// import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+// import axiosInstance from "../../api/axiosInstance";
+// import { ENDPOINTS } from "../../api/endPoints";
+// import Cookies from 'js-cookie';
 
+
+// // console.log(ENDPOINTS,"end points..........")
+
+// // Login User
+
+// export const loginUser = createAsyncThunk("auth/loginUser", async (credentials, { rejectWithValue }) => {
+//   try {
+//     const response = await axiosInstance.post(ENDPOINTS.AUTH.LOGIN, credentials, {
+//       withCredentials: true, // ⬅️ Add this line to send cookies
+//     });
+//     return response.data;
+//   } catch (error) {
+//     return rejectWithValue(error.response?.data || "Invalid credentials");
+//   }
+// });
+
+// // Admin Login
+// export const adminLogin = createAsyncThunk("auth/adminLogin", async (credentials, { rejectWithValue }) => {
+//   try {
+//     const response = await axiosInstance.post(ENDPOINTS.AUTH.ADMIN_LOGIN, credentials, {
+//       withCredentials: true, // ⬅️ Also here
+//     });
+//     return response.data;
+//   } catch (error) {
+//     return rejectWithValue(error.response?.data?.message || "Invalid credentials");
+//   }
+// });
+
+// // Register User (Patient/Doctor)
+
+// export const registerUser = createAsyncThunk(
+//   "auth/registerUser",
+//   async ({ formData, role }, { rejectWithValue }) => {
+//     // console.log(formData, "FormData from Frontend");
+//     try {
+//       const endpoint =
+//         role === "Patient"
+//           ? ENDPOINTS.AUTH.REGISTER_PATIENT
+//           : ENDPOINTS.AUTH.REGISTER_DOCTOR;
+//       // console.log(endpoint, "API Endpoint");
+
+//       const response = await axiosInstance.post(endpoint, formData);
+//       // console.log(response, "API Response");
+//       return response.data;
+//     } catch (error) {
+//       return rejectWithValue(error?.response?.data?.message || error?.message || "Something went wrong");
+//     }
+//   }
+// );
+
+// // Forgot Password
+// export const forgotPassword = createAsyncThunk("auth/forgotPassword", async (email, { rejectWithValue }) => {
+//   try {
+//     const response = await axiosInstance.post(ENDPOINTS.AUTH.FORGOT_PASSWORD, { email });
+//     return response.data;
+//   } catch (error) {
+//     return rejectWithValue(error.response?.data || "Error sending OTP");
+//   }
+// });
+
+// // Reset Password
+// export const resetPassword = createAsyncThunk("auth/resetPassword", async (data, { rejectWithValue }) => {
+//   try {
+//     const response = await axiosInstance.post(ENDPOINTS.AUTH.RESET_PASSWORD, data);
+//     return response.data;
+//   } catch (error) {
+//     return rejectWithValue(error.response?.data || "Password reset failed");
+//   }
+// });
+
+// // Initial State
 // const initialState = {
-//   id: null,
-//   name: null,
-//   email: null,
-//   role: null,
-//   isAuthenticated: false,
+//   user: null,
 //   token: null,
+//   isAuthenticated: false,
 //   loading: false,
 //   error: null,
 // };
 
+// // Slice
 // const authSlice = createSlice({
 //   name: 'auth',
 //   initialState,
+   
 //   reducers: {
-//     loginStart: (state) => {
-//       state.loading = true;
-//       state.error = null;
-//     },
-//     loginSuccess: (state, action) => {
-//       state.id = action.payload.user.id;
-//       state.name = action.payload.user.name;
-//       state.email = action.payload.user.email;
-//       state.role = action.payload.user.role;
-//       state.isAuthenticated = true;
-//       state.token = action.payload.token;
-//       state.loading = false;
-//       state.error = null;
-//     },
-//     loginFailure: (state, action) => {
-//       state.loading = false;
-//       state.error = action.payload;
-//     },
-//     logout: () => initialState,
-//     registerStart: (state) => {
-//       state.loading = true;
-//       state.error = null;
-//     },
-//     registerSuccess: (state) => {
-//       state.loading = false;
-//     },
-//     registerFailure: (state, action) => {
-//       state.loading = false;
-//       state.error = action.payload;
-//     },
-//     clearError: (state) => {
-//       state.error = null;
-//     },
+//     logoutUser: (state) => {
+//       state.user = null;
+//       state.token = null;
+//       state.isAuthenticated = false;
+      
+//       //  Remove token from cookies
+//       Cookies.remove('token');
+//     }
+//   },
+//   extraReducers: (builder) => {
+//     builder
+//       .addCase(registerUser.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(registerUser.fulfilled, (state, action) => {
+//         state.loading = false;
+//         state.user = action.payload;
+//         state.token = action.payload.token || null;
+//         state.isAuthenticated = !!action.payload.token;
+      
+//       })
+//       .addCase(registerUser.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = action.payload;
+        
+//       })
+
+//       // Login User
+//       .addCase(loginUser.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(loginUser.fulfilled, (state, action) => {
+//         state.loading = false;
+//         // state.user = action.payload;
+//         state.user = action.payload.user;
+//         state.token = action.payload.accessToken;
+//         state.isAuthenticated = true; //  Set authentication
+
+//           // Save token in cookies
+//         Cookies.set('token', action.payload.accessToken, { expires: 7 });
+//       })
+//       .addCase(loginUser.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = action.payload;
+//       })
+
+//       // Admin Login
+//       .addCase(adminLogin.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(adminLogin.fulfilled, (state, action) => {
+//         state.loading = false;
+//         state.user = action.payload.user;
+//         state.token = action.payload.accessToken;
+//         state.isAuthenticated = true;
+      
+//         Cookies.set('token', action.payload.accessToken, { expires: 7 });
+//       })
+      
+//       .addCase(adminLogin.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = action.payload;
+//       })
+      
+//        // Forgot & Reset Password
+//       .addCase(forgotPassword.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(forgotPassword.fulfilled, (state) => {
+//         state.loading = false;
+//       })
+//       .addCase(forgotPassword.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = action.payload;
+//       })
+
+//       .addCase(resetPassword.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(resetPassword.fulfilled, (state) => {
+//         state.loading = false;
+//       })
+//       .addCase(resetPassword.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = action.payload;
+//       });
 //   },
 // });
 
-// export const { 
-//   loginStart, 
-//   loginSuccess, 
-//   loginFailure, 
-//   logout, 
-//   registerStart, 
-//   registerSuccess, 
-//   registerFailure,
-//   clearError
-// } = authSlice.actions;
-
+// export const { logoutUser } = authSlice.actions;
 // export default authSlice.reducer;
 
 
 
 
 
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "../../api/axiosInstance";
-import { ENDPOINTS } from "../../api/endPoints";
 
-// console.log(ENDPOINTS,"end points..........")
 
-// Login User
-export const loginUser = createAsyncThunk("auth/loginUser", async (credentials, { rejectWithValue }) => {
-  try {
-    const response = await axiosInstance.post(ENDPOINTS.AUTH.LOGIN, credentials);
-    // localStorage.setItem("token", response.data.token);
-    // localStorage.setItem("user", JSON.stringify(response.data));
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data || "Invalid credentials");
-  }
-});
 
-// Admin Login
-export const adminLogin = createAsyncThunk("auth/adminLogin", async (credentials, { rejectWithValue }) => {
-  try {
-    const response = await axiosInstance.post(ENDPOINTS.AUTH.ADMIN_LOGIN, credentials);
-    // localStorage.setItem("token", response.data.token);
-    // localStorage.setItem("user", JSON.stringify(response.data)); 
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message || "Invalid credentials");
-  }
-});
 
-// Register User (Patient/Doctor)
 
+
+
+
+
+
+
+
+
+
+
+
+
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axiosInstance from '../../api/axiosInstance';
+import Cookies from 'js-cookie';
+import { ENDPOINTS } from '../../api/endPoints';
+
+// Register User (Patient or Doctor)
 export const registerUser = createAsyncThunk(
-  "auth/registerUser",
+  'auth/registerUser',
   async ({ formData, role }, { rejectWithValue }) => {
-    // console.log(formData, "FormData from Frontend");
     try {
       const endpoint =
-        role === "Patient"
+        role === 'Patient'
           ? ENDPOINTS.AUTH.REGISTER_PATIENT
           : ENDPOINTS.AUTH.REGISTER_DOCTOR;
-      // console.log(endpoint, "API Endpoint");
 
       const response = await axiosInstance.post(endpoint, formData);
-      // console.log(response, "API Response");
       return response.data;
     } catch (error) {
-      return rejectWithValue(error?.response?.data?.message || error?.message || "Something went wrong");
+      return rejectWithValue(
+        error?.response?.data?.message || error?.message || 'Something went wrong'
+      );
     }
   }
 );
 
 // Forgot Password
-export const forgotPassword = createAsyncThunk("auth/forgotPassword", async (email, { rejectWithValue }) => {
-  try {
-    const response = await axiosInstance.post(ENDPOINTS.AUTH.FORGOT_PASSWORD, { email });
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data || "Error sending OTP");
+export const forgotPassword = createAsyncThunk(
+  'auth/forgotPassword',
+  async (email, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(ENDPOINTS.AUTH.FORGOT_PASSWORD, { email });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Error sending OTP');
+    }
   }
-});
+);
 
 // Reset Password
-export const resetPassword = createAsyncThunk("auth/resetPassword", async (data, { rejectWithValue }) => {
-  try {
-    const response = await axiosInstance.post(ENDPOINTS.AUTH.RESET_PASSWORD, data);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data || "Password reset failed");
+export const resetPassword = createAsyncThunk(
+  'auth/resetPassword',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(ENDPOINTS.AUTH.RESET_PASSWORD, data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Password reset failed');
+    }
   }
-});
+);
+
+// Login User
+export const loginUser = createAsyncThunk(
+  'auth/login',
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(ENDPOINTS.AUTH.LOGIN, credentials);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Login failed');
+    }
+  }
+);
+
+// Logout User
+export const logoutUser = createAsyncThunk(
+  'auth/logout',
+  async (_, { rejectWithValue }) => {
+    try {
+      await axiosInstance.post(ENDPOINTS.AUTH.LOGOUT);
+      Cookies.remove('token');
+      Cookies.remove('refreshToken');
+      return null;
+    } catch (error) {
+      return rejectWithValue('Logout failed');
+    }
+  }
+);
 
 // Initial State
 const initialState = {
   user: null,
-  token: null,
-  isAuthenticated: false,
   loading: false,
   error: null,
-  // user: JSON.parse(localStorage.getItem("user")) || null,
-  // isAuthenticated: !!JSON.parse(localStorage.getItem("user")), // ✅ Ensure boolean value
-  // loading: false,
-  // error: null,
 };
 
-// Slice
+// Auth Slice
 const authSlice = createSlice({
   name: 'auth',
   initialState,
-   
   reducers: {
-    logoutUser: (state) => {
-      state.user = null;
-      state.token = null;
-      state.isAuthenticated = false;
-      // localStorage.removeItem("user");
-      // localStorage.removeItem("token"); // Clear token from storage
-    }
+    clearError: (state) => {
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(registerUser.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(registerUser.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload;
-        state.token = action.payload.token || null;
-        state.isAuthenticated = !!action.payload.token;
-        // state.isAuthenticated = true; //Set authentication
-        // localStorage.setItem("user", JSON.stringify(action.payload));
-      })
-      .addCase(registerUser.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-        
-      })
-
-
-      // .addCase(loginUser.fulfilled, (state, action) => {
-      //   state.user = {
-      //     ...action.payload,
-      //     fullName: action.payload.fullName,
-      //   };
-      // })
-
-      
-      // Login User
+      // Login
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
-        state.token = action.payload.accessToken;
-        state.isAuthenticated = true; //  Set authentication
+        state.user = action.payload.user;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
-      // Admin Login
-      .addCase(adminLogin.pending, (state) => {
+      // Register
+      .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(adminLogin.fulfilled, (state, action) => {
+      .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
-        state.token = action.payload.token;
-        state.isAuthenticated = true;
+        state.user = action.payload.user; // depends on backend
       })
-      .addCase(adminLogin.rejected, (state, action) => {
+      .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      
-       // Forgot & Reset Password
+
+      // Forgot Password
       .addCase(forgotPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -241,6 +344,7 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
+      // Reset Password
       .addCase(resetPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -251,9 +355,154 @@ const authSlice = createSlice({
       .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // Logout
+      .addCase(logoutUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.loading = false;
+        state.user = null;
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { logoutUser } = authSlice.actions;
+export const { clearError } = authSlice.actions;
 export default authSlice.reducer;
+
+
+// // authSlice.js
+// import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+// import { loginApi, registerApi, forgotPasswordApi, resetPasswordApi } from './authApi'; // API calls
+// import { setAccessToken } from '../utils/authUtils'; // Helper function to store token
+
+// const initialState = {
+//   user: null,
+//   token: null,
+//   isAuthenticated: false,
+//   loading: false,
+//   error: null,
+// };
+
+// export const loginUser = createAsyncThunk(
+//   'auth/loginUser',
+//   async (credentials, { rejectWithValue }) => {
+//     try {
+//       const response = await loginApi(credentials);
+//       setAccessToken(response.data.accessToken); // Store token
+//       return response.data.user;
+//     } catch (error) {
+//       return rejectWithValue(error.response?.data || 'Login failed');
+//     }
+//   }
+// );
+
+// export const registerUser = createAsyncThunk(
+//   'auth/registerUser',
+//   async (userData, { rejectWithValue }) => {
+//     try {
+//       const response = await registerApi(userData);
+//       return response.data.user;
+//     } catch (error) {
+//       return rejectWithValue(error.response?.data || 'Registration failed');
+//     }
+//   }
+// );
+
+// export const forgotPassword = createAsyncThunk(
+//   'auth/forgotPassword',
+//   async (email, { rejectWithValue }) => {
+//     try {
+//       await forgotPasswordApi(email);
+//     } catch (error) {
+//       return rejectWithValue(error.response?.data || 'Failed to send reset OTP');
+//     }
+//   }
+// );
+
+// export const resetPassword = createAsyncThunk(
+//   'auth/resetPassword',
+//   async (resetData, { rejectWithValue }) => {
+//     try {
+//       await resetPasswordApi(resetData);
+//     } catch (error) {
+//       return rejectWithValue(error.response?.data || 'Password reset failed');
+//     }
+//   }
+// );
+
+// const authSlice = createSlice({
+//   name: 'auth',
+//   initialState,
+//   reducers: {
+//     logoutUser(state) {
+//       state.user = null;
+//       state.token = null;
+//       state.isAuthenticated = false;
+//       state.loading = false;
+//       state.error = null;
+//       // Remove token from localStorage or cookies
+//       localStorage.removeItem('accessToken');
+//     },
+//   },
+//   extraReducers: (builder) => {
+//     builder
+//       .addCase(loginUser.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(loginUser.fulfilled, (state, action) => {
+//         state.loading = false;
+//         state.user = action.payload;
+//         state.isAuthenticated = true;
+//       })
+//       .addCase(loginUser.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = action.payload;
+//       })
+//       .addCase(registerUser.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(registerUser.fulfilled, (state, action) => {
+//         state.loading = false;
+//         state.user = action.payload;
+//         state.isAuthenticated = true;
+//       })
+//       .addCase(registerUser.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = action.payload;
+//       })
+//       .addCase(forgotPassword.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(forgotPassword.fulfilled, (state) => {
+//         state.loading = false;
+//       })
+//       .addCase(forgotPassword.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = action.payload;
+//       })
+//       .addCase(resetPassword.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(resetPassword.fulfilled, (state) => {
+//         state.loading = false;
+//       })
+//       .addCase(resetPassword.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = action.payload;
+//       });
+//   },
+// });
+
+// export const { logoutUser } = authSlice.actions;
+// export default authSlice.reducer;

@@ -85,12 +85,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Provider } from 'react-redux';
+import {Toaster } from "sonner";
 import store  from './redux/store';
-import ToastContainer from "./components/ui/ToastContainer";
+// import ToastContainer from "./components/ui/ToastContainer";
+
+
 import HomePage from "./pagess/HomePage";
-
-
-
 import PatientRegistration from './pages/PatientRegistration';
 import DoctorRegistration from './pages/DoctorRegistration';
 import Login from './pages/Login';
@@ -108,17 +108,16 @@ import MainLayout from "./components/layout/MainLayout";
 import NotFound from "./pagess/NotFound";
 import DoctorDetailsPage from "./pagess/DoctorDetailsPage";
 
+
 const queryClient = new QueryClient();
 
 const App = () => (
   <Provider store={store}>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {/* <Toaster /> */}
-        {/* <Toaster position="top-right" richColors closeButton /> */}
-        {/* <Sonner /> */}
-
-        <ToastContainer />
+      <Toaster  richColors position="top-center" closeButton /> {/* Toaster */}
+      
+        {/* <ToastContainer /> */}
         <BrowserRouter>
        
           <Routes>
@@ -139,10 +138,10 @@ const App = () => (
             <Route element={<MainLayout />}>
               <Route path="/dashboard1" element={<DashboardPage />} />
               <Route path="/doctors" element={<DoctorsPage />} />
-              <Route path="/doctor/:id" element={<DoctorDetailsPage />} />
+              <Route path="/doctors/:id" element={<DoctorDetailsPage />} />
               <Route path="/book-appointment/:doctorId" element={<BookAppointmentPage />} />
               <Route path="/appointments" element={<AppointmentsPage />} />
-              {/* <Route path="/book-appointment/:doctorId" element={<BookAppointmentPage />} /> */}
+              <Route path="/book-appointment/:doctorId" element={<BookAppointmentPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/ui" element={<UIComponentsPage />} />
             </Route>
@@ -154,6 +153,7 @@ const App = () => (
       </TooltipProvider>
     </QueryClientProvider>
   </Provider>
+ 
 );
 
 export default App;

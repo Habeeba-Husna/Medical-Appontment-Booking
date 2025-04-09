@@ -1,28 +1,57 @@
-import React from 'react';
+
+
+import React,{useEffect} from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { useAppSelector } from '../hooks/useAppSelector';
-import { Card, CardContent} from '../components/ui/Card';
+import { Card, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { Calendar, Clock } from 'lucide-react';
+import { Calendar, Clock, AlarmClock } from 'lucide-react';
 import { Button } from '../components/ui/Button';
-
+import { fetchAppointments ,} from '../store/slices/appointmentSlice';
+import { useDispatch } from 'react-redux';
 const AppointmentsPage = () => {
+  const dispatch=useDispatch()
   const { appointments } = useAppSelector(state => state.appointments);
+  console.log(appointments,"apointgghhhh");
+  useEffect(() => {
+    dispatch(fetchAppointments());
+  }, [dispatch]);
+
+  const now = new Date();
+
+  const isToday = (dateString) => {
+    const date = new Date(dateString);
+    return (
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth() &&
+      date.getDate() === now.getDate()
+    );
+  };
+
+  const isWithinNext24Hours = (dateString, time) => {
+    const appointmentDateTime = new Date(`${dateString}T${time}`);
+    const diff = appointmentDateTime - now;
+    return diff > 0 && diff <= 24 * 60 * 60 * 1000;
+  };
 
   const upcomingAppointments = appointments.filter(
-    app => app.status !== 'completed' && app.status !== 'cancelled'
+    (app) =>
+      (app.status !== 'completed' && app.status !== 'cancelled') &&
+      !isToday(app.date)
+  );
+
+  const todayAppointments = appointments.filter(
+    (app) => isToday(app.date) && (app.status !== 'completed' && app.status !== 'cancelled')
   );
 
   const pastAppointments = appointments.filter(
-    app => app.status === 'completed' || app.status === 'cancelled'
+    (app) => app.status === 'completed' || app.status === 'cancelled'
   );
 
   const formatDate = (dateString) => {
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
-
-  
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -39,114 +68,168 @@ const AppointmentsPage = () => {
     }
   };
 
+  const renderAppointmentCard = (appointment, highlightToday = false) => (
+    <Card
+      key={
+        appointment._id ??
+        appointment.id ??
+        (appointment.doctor && appointment.date && appointment.time
+          ? `${appointment.doctor.fullName}-${appointment.date}-${appointment.time}`
+          : Math.random())
+      }
+      className={highlightToday ? 'border-2 border-blue-500 bg-blue-50' : ''}
+    >
+      <CardContent className="p-6">
+        <div className="flex flex-col md:flex-row justify-between gap-4">
+          <div className="flex-1">
+            <div className="flex justify-between mb-2 items-center">
+              <div className="flex items-center gap-2">
+                <h3 className="text-xl font-semibold text-medical-secondary">
+                  {appointment.doctorId
+ ? appointment.doctorId
+ .fullName : 'Unknown Doctor'}
+                </h3>
+                {highlightToday && (
+                  <Badge className="bg-blue-200 text-blue-800 flex items-center gap-1">
+                    <AlarmClock className="w-4 h-4" /> Today
+                  </Badge>
+                )}
+              </div>
+              <Badge className={getStatusColor(appointment.status)}>
+                {appointment.status?.charAt(0).toUpperCase() + appointment.status.slice(1)}
+              </Badge>
+            </div>
+            <p className="text-gray-600 mb-4">{appointment.doctorId
+.specialization}</p>
+  
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <Calendar className="h-4 w-4 mr-2 text-gray-500" />
+                <span>{formatDate(appointment.date)}</span>
+              </div>
+              <div className="flex items-center">
+                <Clock className="h-4 w-4 mr-2 text-gray-500" />
+                <span>{appointment.time}</span>
+              </div>
+            </div>
+          </div>
+  
+          <div className="flex flex-row md:flex-col gap-2">
+            <Button variant="outline" className="text-medical-secondary border-medical-secondary hover:bg-medical-light flex-1">
+              Reschedule
+            </Button>
+            <Button variant="outline" className="text-red-500 border-red-500 hover:bg-red-50 flex-1">
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+  
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">My Appointments</h1>
 
       <Tabs defaultValue="upcoming" className="w-full">
-        <TabsList className="mb-6">
-          <TabsTrigger value="upcoming">Upcoming Appointments</TabsTrigger>
-          <TabsTrigger value="past">Past Appointments</TabsTrigger>
-        </TabsList>
+  <TabsList className="flex justify-center bg-gray-100 p-2 rounded-xl mb-8 shadow-sm">
+    <TabsTrigger
+      value="upcoming"
+      className="data-[state=active]:bg-medical-primary data-[state=active]:text-white px-6 py-2 rounded-lg transition-all duration-300 text-gray-600"
+    >
+      Upcoming
+    </TabsTrigger>
+    <TabsTrigger
+      value="past"
+      className="data-[state=active]:bg-medical-primary data-[state=active]:text-white px-6 py-2 rounded-lg transition-all duration-300 text-gray-600"
+    >
+      Past
+    </TabsTrigger>
+  </TabsList>
 
-        <TabsContent value="upcoming">
-          {upcomingAppointments.length === 0 ? (
-            <Card>
-              <CardContent className="py-10 text-center">
-                <p className="text-gray-500 mb-4">You don't have any upcoming appointments.</p>
-                <Button 
-                  onClick={() => window.location.href = '/doctors'}
-                  className="bg-medical-primary hover:bg-medical-secondary"
-                >
-                  Book an Appointment
-                </Button>
-              </CardContent>
-            </Card>
+        {/* Upcoming Appointments */}
+  <TabsContent value="upcoming" className="animate-fadeIn">
+    {todayAppointments.length === 0 && upcomingAppointments.length === 0 ? (
+      <Card className="shadow-md">
+        <CardContent className="py-10 text-center">
+          <p className="text-gray-500 mb-4">You don't have any upcoming appointments.</p>
+          <Button 
+            onClick={() => window.location.href = '/doctors'}
+            className="bg-medical-primary hover:bg-medical-secondary"
+          >
+            Book an Appointment
+          </Button>
+        </CardContent>
+      </Card>
           ) : (
             <div className="grid grid-cols-1 gap-6">
-              {upcomingAppointments.map((appointment) => (
-                // <Card key={appointment.id}>
-                // <Card key={appointment.id || appointment._id}>
-                <Card
-                key={
-                  appointment._id ??
-                  appointment.id ??
-                  (appointment.doctorName && appointment.date && appointment.time
-                    ? `${appointment.doctorName}-${appointment.date}-${appointment.time}`
-                    : Math.random())
-                }
-              >
-
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex justify-between mb-2">
-                          <h3 className="text-xl font-semibold text-medical-secondary">{appointment.doctorName}</h3>
-                          <Badge className={getStatusColor(appointment.status)}>
-                            {/* {appointment.status?.charAt(0).toUpperCase() + appointment.status.slice(1)} */}
-                            {appointment.status
-  ? appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)
-  : 'N/A'}
-
-                          </Badge>
-                        </div>
-                        <p className="text-gray-600 mb-4">{appointment.specialization}</p>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{formatDate(appointment.date)}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Clock className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{appointment.time}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-row md:flex-col gap-2">
-                        <Button variant="outline" className="text-medical-secondary border-medical-secondary hover:bg-medical-light flex-1">Reschedule</Button>
-                        <Button variant="outline" className="text-red-500 border-red-500 hover:bg-red-50 flex-1">Cancel</Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {/* Today’s Appointments */}
+              {todayAppointments.length > 0 && (
+                <>
+                   <div className="flex items-center gap-2 text-blue-700 text-lg font-semibold">
+              <AlarmClock className="w-5 h-5" /> <span>Today's Appointments</span>
             </div>
-          )}
-        </TabsContent>
+            {todayAppointments.map((appointment) =>
+              renderAppointmentCard(appointment, true)
+            )}
+          </>
+        )}
 
-        <TabsContent value="past">
-          {pastAppointments.length === 0 ? (
-            <Card>
-              <CardContent className="py-10 text-center">
-                <p className="text-gray-500">You don't have any past appointment records.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 gap-6">
-              {pastAppointments.map((appointment) => (
-                // <Card key={appointment.id}>
-                // <Card key={appointment.id || appointment._id}>
-                <Card
-                key={
-                  appointment._id ??
-                  appointment.id ??
-                  (appointment.doctorName && appointment.date && appointment.time
-                    ? `${appointment.doctorName}-${appointment.date}-${appointment.time}`
-                    : Math.random())
-                }
-              >
+              {/* Other upcoming */}
+              {upcomingAppointments.length > 0 && (
+                <>
+                  <div className="flex items-center gap-2 text-gray-800 text-lg font-semibold mt-6">
+              <Calendar className="w-5 h-5" /> <span>Upcoming Appointments</span>
+            </div>
+            {upcomingAppointments.map((appointment) =>
+              renderAppointmentCard(appointment)
+            )}
+          </>
+        )}
+      </div>
+    )}
+  </TabsContent>
+
+   {/* Past Appointments */}
+
+   <TabsContent value="past" className="animate-fadeIn">
+    {pastAppointments.length === 0 ? (
+      <Card className="shadow-md">
+        <CardContent className="py-10 text-center">
+          <p className="text-gray-500">You don't have any past appointment records.</p>
+        </CardContent>
+      </Card>
+    ) : (
+      <div className="grid grid-cols-1 gap-6">
+        <div className="flex items-center gap-2 text-gray-800 text-lg font-semibold mb-4">
+          <Calendar className="w-5 h-5" /> <span>Past Appointments</span>
+        </div>
+        {pastAppointments.map((appointment) =>
+          <Card
+            key={
+              appointment._id ??
+              appointment.id ??
+              (appointment.doctorName && appointment.date && appointment.time
+                ? `${appointment.doctorName}-${appointment.date}-${appointment.time}`
+                : Math.random())
+            }
+             className="shadow-md"
+                >
                   <CardContent className="p-6">
                     <div className="flex flex-col md:flex-row justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex justify-between mb-2">
-                          <h3 className="text-xl font-semibold text-medical-secondary">{appointment.doctorName}</h3>
+                          <h3 className="text-xl font-semibold text-medical-secondary">
+                          {appointment.doctor.fullName}
+ 
+
+                          </h3>
                           <Badge className={getStatusColor(appointment.status)}>
                             {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                           </Badge>
                         </div>
-                        <p className="text-gray-600 mb-4">{appointment.specialization}</p>
+                        <p className="text-gray-600 mb-4">  {appointment.doctor.specialization}
+                        </p>
 
                         <div className="space-y-2">
                           <div className="flex items-center">
@@ -162,14 +245,18 @@ const AppointmentsPage = () => {
 
                       <div>
                         {appointment.status === 'completed' && (
-                          <Button variant="outline" className="text-medical-secondary border-medical-secondary hover:bg-medical-light w-full mb-2">View Prescription</Button>
+                          <Button variant="outline" className="text-medical-secondary border-medical-secondary hover:bg-medical-light w-full mb-2">
+                            View Prescription
+                          </Button>
                         )}
-                        <Button variant="outline" className="text-medical-primary border-medical-primary hover:bg-medical-light w-full">Book Again</Button>
+                        <Button variant="outline" className="text-medical-primary border-medical-primary hover:bg-medical-light w-full">
+                          Book Again
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              )}
             </div>
           )}
         </TabsContent>
@@ -179,3 +266,5 @@ const AppointmentsPage = () => {
 };
 
 export default AppointmentsPage;
+
+

@@ -4,7 +4,8 @@ import * as Yup from "yup";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import axiosInstance, { ENDPOINTS } from "../api/axiosInstance";
+import axiosInstance from "../api/axiosInstance";
+import { ENDPOINTS } from "../api/endPoints";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();

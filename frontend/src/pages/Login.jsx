@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser, adminLogin } from '../store/slices/authSlice';
+import { loginUser, 
+  // adminLogin 
+} from '../store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { Stethoscope, User, Shield } from 'lucide-react';
+import Cookies from 'js-cookie';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -46,9 +49,35 @@ const Login = () => {
     let response;
     if (role === 'Admin') {
       response = await dispatch(adminLogin({ email, password })).unwrap();
+
+       // Save the access token in cookies after successful login
+       console.log('Admin Login Success:', response.accessToken);
+      Cookies.set('accessToken', response.accessToken, {
+        expires: 1, // 1 day expiration
+        secure: true, // Only sent over HTTPS
+        sameSite: 'Strict',
+      });
+
       navigate('/dashboard3');
     } else {
       response = await dispatch(loginUser({ email, password, role })).unwrap();
+
+      console.log('User Login Success:', response.accessToken);
+       // Save the access token in cookies after successful login
+       Cookies.set('accessToken', response.accessToken, {
+        expires: 1,
+        secure: true,
+        sameSite: 'Strict',
+      });
+
+      // Redirect based on user role
+      if (role === 'Patient') {
+        navigate('/dashboard1');
+      } else if (role === 'Doctor') {
+        navigate('/dashboard2');
+      }
+    
+
       console.log('Navigation Triggered for:', response.role);
       navigate(role === 'Patient' ? '/dashboard1' : '/dashboard2');
       console.log(role)
@@ -56,11 +85,12 @@ const Login = () => {
       console.log(response,"asdfghj...................")
     }
   } catch (err) {
-    setError(err?.message || 'Login failed. Please try again.');
+    // setError(err?.message || 'Login failed. Please try again.');
+    setError(loginError || 'Login failed. Please check your credentials and try again.');
   }
   };
-  const authState = useSelector(state => state.auth);
-// console.log(authState,"habeebass login sucess");
+  // const authState = useSelector(state => state.auth);
+
 
 
 

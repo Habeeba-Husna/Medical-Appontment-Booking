@@ -117,10 +117,22 @@ const doctorSchema = new mongoose.Schema(
       type: [availableSlotSchema],
       default: [],
     },
+    about: { type: String, default: '' },
 
     isVerified: { type: Boolean, default: false },
     isApproved: { type: Boolean, default: false },
     isProfileComplete: { type: Boolean, default: false },  // optional flag
+
+    ratings: [
+      {
+        rating: { type: Number, required: true },
+        comment: { type: String },
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Patient' },
+        userName: { type: String },
+        createdAt: { type: Date, default: Date.now }
+      }
+    ]
+
   },
   {
     timestamps: true,
