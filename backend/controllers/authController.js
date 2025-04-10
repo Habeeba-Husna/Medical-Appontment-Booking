@@ -626,20 +626,22 @@ export const loginUser = async (req, res) => {
 
 // Token Refresh
 export const refreshToken = async (req, res) => {
+  console.log("refresh token,,,")
   try {
-    const { refreshToken } = req.body;
+    const { refreshToken } = req.cookies;
     
     if (!refreshToken) {
       return res.status(401).json({ message: 'Refresh token required' });
     }
-
+console.log("refresh token,,,,",refreshToken)
     const decoded = verifyRefreshToken(refreshToken);
+    console.log("user informatim,",decoded)
     const user = await getUserByEmail(decoded.email);
     
     if (!user) {
       return res.status(401).json({ message: 'Invalid refresh token' });
     }
-
+    console.log(user,"userdata.....")
     const newAccessToken = generateAccessToken(user);
     
     res.cookie('token', newAccessToken, {

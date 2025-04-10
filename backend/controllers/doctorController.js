@@ -7,6 +7,7 @@ const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
 
 // Get all approved & verified doctors with search, pagination, sorting, nextAvailable, and rating
 export const getAllDoctors = asyncHandler(async (req, res) => {
+  console.log("doctor controll")
   let { search = '', page = 1, limit = 10, sortBy = 'fullName', order = 'asc' } = req.query;
 
   // Validate page & limit

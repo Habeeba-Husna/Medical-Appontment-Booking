@@ -136,11 +136,11 @@ app.use(cors({
   credentials: true
 }));
 
-app.use('/api', authRoutes);
+app.use('/api/auth', authRoutes);
 
 app.use('/api/patient', patientRoutes);
 // app.use('/api/doctor', doctorRoutes);
-app.use('/api', appointmentRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 
 const PORT = process.env.PORT || 5000;

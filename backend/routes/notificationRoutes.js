@@ -24,7 +24,7 @@ import {
 
 const router = express.Router();
 
-router.use(verifyToken, authenticatePatient); // ✅ Secure the whole file
+router.use(verifyToken, authenticatePatient); // Secure the whole file
 
 router.get('/notifications', getNotifications);
 router.put('/notifications/:notificationId', markNotificationAsRead);

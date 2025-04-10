@@ -179,7 +179,7 @@ dotenv.config();
 
 export const generateAccessToken = (user) => {
   return jwt.sign(
-    { id: user._id, role: user.role },
+    { id: user._id, role: user.role ,email:user.email},
     process.env.JWT_SECRET,
     { expiresIn: '15m' }
   );
@@ -187,13 +187,14 @@ export const generateAccessToken = (user) => {
 
 export const generateRefreshToken = (user) => {
   return jwt.sign(
-    { id: user._id, role: user.role },
+    { id: user._id, role: user.role,email:user.email },
     process.env.JWT_REFRESH_SECRET,
     { expiresIn: '7d' }
   );
 };
 
 export const verifyToken = (token) => {
+  console.log("verify the token.....")
   return jwt.verify(token, process.env.JWT_SECRET);
 };
 

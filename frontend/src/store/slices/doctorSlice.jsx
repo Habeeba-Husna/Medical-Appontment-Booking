@@ -3,25 +3,23 @@ import axiosInstance from '../../api/axiosInstance';
 import { ENDPOINTS } from '../../api/endPoints';
 import Cookies from 'js-cookie';
 
-// 🔁 Thunks
+
 
 // Fetch all doctors
 
 export const fetchDoctors = createAsyncThunk(
   'doctors/fetchDoctors',
   async (_, thunkAPI) => {
-    try {
-      // const response = await axiosInstance.get('/patient/doctors');
-      const token = Cookies.get('token');
-if (!token) return thunkAPI.rejectWithValue('No token found in cookies');
+    console.log("in doctor redux page .....")
+   try {
+//       // const response = await axiosInstance.get('/patient/doctors');
+//       const token = Cookies.get('token');
+// if (!token) return thunkAPI.rejectWithValue('No token found in cookies');
 
-const response = await axiosInstance.get(ENDPOINTS.PATIENT.DOCTORS, {
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-});
-
+const response = await axiosInstance.get(ENDPOINTS.PATIENT.DOCTORS);
+    console.log(response.data,"responce of doctor list,,,,,,,,,,,,,,")
       return response.data;
+      
     } catch (error) {
       if (error.response?.status === 401) {
         try {
@@ -38,23 +36,23 @@ const response = await axiosInstance.get(ENDPOINTS.PATIENT.DOCTORS, {
 );
 
 
-// ✅ Fetch a single doctor by ID
+// single doctor by ID
 export const fetchDoctorById = createAsyncThunk(
   'doctors/fetchDoctorById',
   async (doctorId, thunkAPI) => {
     try {
-      const token = Cookies.get('token');
-      console.log(token)
-      if (!token) {
-        return thunkAPI.rejectWithValue('Access token is missing');
-      }
-
-      const response = await axiosInstance.get(ENDPOINTS.PATIENT.SINGLE_DOCTOR(doctorId),
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+      // const token = Cookies.get('token');
+      // console.log(token)
+      // if (!token) {
+      //   return thunkAPI.rejectWithValue('Access token is missing');
+      // }
+console.log("cvbnm............")
+      const response = await axiosInstance.get(ENDPOINTS.PATIENT.SINGLE_DOCTOR(doctorId)
+      // {
+      //   headers: {
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      // }
     );
       // const response = await axiosInstance.get('/api/patient/:id');
 
@@ -93,7 +91,6 @@ export const refreshToken = createAsyncThunk(
 
 
 
-// Initial State
 const initialState = {
   list: [],              // All doctors
   singleDoctor: null,    // Selected doctor
@@ -101,7 +98,7 @@ const initialState = {
   loading: false,
   error: null,
 };
-// Slice
+
 const doctorSlice = createSlice({
   name: 'doctors',
   initialState,
@@ -113,7 +110,7 @@ const doctorSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
-      // 📥 Fetch All Doctors
+      //Fetch All Doctors
       .addCase(fetchDoctors.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -127,7 +124,7 @@ const doctorSlice = createSlice({
         state.error = action.payload;
       })
 
-      // 🔍 Fetch Single Doctor
+      //fetch Single Doctor
       .addCase(fetchDoctorById.pending, (state) => {
         state.isSingleDoctorLoading = true;
         state.error = null;
@@ -141,7 +138,7 @@ const doctorSlice = createSlice({
         state.error = action.payload;
       })
       
-      // 🔁 Refresh Token
+      //Refresh Token
       .addCase(refreshToken.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -157,7 +154,7 @@ const doctorSlice = createSlice({
   }
 });
 
-// Exports
+
 export const { clearDoctorDetails } = doctorSlice.actions;
 export default doctorSlice.reducer;
 
@@ -230,7 +227,6 @@ export default doctorSlice.reducer;
 // import { ENDPOINTS } from '../../api/endPoints';
 // import Cookies from 'js-cookie';
 
-// // 🔁 Thunks
 
 // // Fetch all doctors
 // export const fetchDoctors = createAsyncThunk(

@@ -29,7 +29,7 @@ import {
 
 const router = express.Router();
 
-// router.use(verifyToken, authenticateDoctor); // ✅ Apply to all routes
+// router.use(verifyToken, authenticateDoctor); //  Apply to all routes
 
 router.get('/profile', getDoctorProfile);
 router.put('/profile', updateDoctorProfile);

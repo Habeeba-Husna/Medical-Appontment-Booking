@@ -71,15 +71,6 @@
 
 //converted
 
-
-
-// import { Toaster } from "@/components/ui/toaster";
-// import { Toaster as Sonner } from "@/components/ui/sonner";
-// import { TooltipProvider } from "@/components/ui/tooltip";
-// import { Toaster } from "sonner"; // For toast notifications
-// import LoginPage from "./pagess/LoginPage";
-// import RegisterPage from "./pagess/RegisterPage";
-
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { TooltipProvider } from "@radix-ui/react-tooltip";
@@ -107,7 +98,8 @@ import ProfilePage from "./pagess/ProfilePage";
 import MainLayout from "./components/layout/MainLayout";
 import NotFound from "./pagess/NotFound";
 import DoctorDetailsPage from "./pagess/DoctorDetailsPage";
-
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 const queryClient = new QueryClient();
 
@@ -115,7 +107,9 @@ const App = () => (
   <Provider store={store}>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-      <Toaster  richColors position="top-center" closeButton /> {/* Toaster */}
+      {/* <Toaster  richColors position="top-center" closeButton /> Toaster
+       */}
+       <ToastContainer position="top-right" autoClose={3000} />
       
         {/* <ToastContainer /> */}
         <BrowserRouter>

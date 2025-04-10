@@ -122,6 +122,7 @@ const Hero = () => {
         <div className="md:w-1/2 flex justify-center">
           <img 
             src="https://img.freepik.com/free-vector/doctors-concept-illustration_114360-1515.jpg" 
+            // src="https://cdn.dribbble.com/userupload/11768356/file/…1a30a60351cc.jpg?resize=1600x1200&vertical=center"
             alt="Health" 
             className="w-full max-w-lg rounded-lg"
           />

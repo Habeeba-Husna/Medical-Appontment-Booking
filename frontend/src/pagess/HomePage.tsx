@@ -93,15 +93,15 @@ const HomePage = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
                 {
-                  name: 'Sarah Johnson',
+                  name: 'Sarah Elizabeth',
                   text: 'HealthHarbor Connect made finding a specialist and booking an appointment incredibly easy. I was able to see a doctor the same day!'
                 },
                 {
-                  name: 'Michael Chen',
+                  name: 'Michael shan',
                   text: 'The virtual consultation feature saved me so much time. I got the medical advice I needed without having to leave my home.'
                 },
                 {
-                  name: 'Emily Wilson',
+                  name: 'Emin Wilson',
                   text: 'I love being able to access all my medical records and prescriptions in one place. This platform has simplified my healthcare journey.'
                 }
               ].map((testimonial, index) => (

@@ -77,7 +77,7 @@ import {
 
 const router = express.Router();
 
-router.use(verifyToken, authenticateAdmin); // ✅ Apply to all routes below
+router.use(verifyToken, authenticateAdmin); //Apply to all routes below
 
 router.put('/verify-doctor/:id', verifyDoctor);
 router.put('/approve-doctor/:id', approveDoctor);

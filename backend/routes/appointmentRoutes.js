@@ -1,10 +1,14 @@
 import express from 'express';
-import {createAppointment,getAllAppointments} from '../controllers/appointmentController.js';
+import {createAppointment,getAllAppointments,cancelAppointment,rescheduleAppointment} from '../controllers/appointmentController.js';
+import { authenticate } from '../middleware/authMiddleware.js';
+import { authorizeRoles } from '../middleware/authorizeRoles.js';
+// const { authenticateUser } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-router.post('/appointments/book', createAppointment);
-router.get('/appointments', getAllAppointments);
-
+router.post('/appointments/book',authenticate,authorizeRoles('patient'), createAppointment);
+router.get('/appointments',authenticate,authorizeRoles('patient'), getAllAppointments);
+router.patch('/appointments/:appointmentId',authenticate,authorizeRoles('patient'), cancelAppointment);
+router.patch('/reschedule/:id',authenticate,authorizeRoles('patient'),rescheduleAppointment);
 
 export default router;

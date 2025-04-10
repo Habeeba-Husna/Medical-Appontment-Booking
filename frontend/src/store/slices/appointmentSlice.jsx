@@ -4,14 +4,16 @@ import axiosInstance from '../../api/axiosInstance';
 import { ENDPOINTS } from '../../api/endPoints';
 
 
-// 🔁 Thunks
+// 
 export const fetchAppointments = createAsyncThunk(
   'appointments/fetchAppointments',
   async (_, thunkAPI) => {
     try {
       const response = await axiosInstance.get(ENDPOINTS.PATIENT.GET_APPOINTMENTS);
-      console.log(response.data,"appointment slice.................//////")
-      return response.data;
+      console.log('Fetched Appointments:', response.data);
+      const appointments = response.data.appointments || response.data;
+      console.log('Fetched Appointments:', appointments);
+      return appointments;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || 'Failed to fetch appointments');
     }
@@ -35,30 +37,34 @@ export const cancelAppointment = createAsyncThunk(
   'appointments/cancelAppointment',
   async (appointmentId, thunkAPI) => {
     try {
-      await axiosInstance.delete(`${ENDPOINTS.PATIENT.CANCEL_APPOINTMENT}/${appointmentId}`);
-      return appointmentId;
+      const response = await axiosInstance.patch(
+         `${ENDPOINTS.PATIENT.CANCEL_APPOINTMENT(appointmentId)}`
+      );
+      return { appointmentId, status: 'cancelled' };
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || 'Failed to cancel appointment');
     }
   }
 );
 
+
 export const rescheduleAppointment = createAsyncThunk(
   'appointments/rescheduleAppointment',
-  async ({ appointmentId, newDate, newTime }, thunkAPI) => {
+  async ({ newDate, newTime, appointmentId }, thunkAPI) => {
     try {
-      const response = await axiosInstance.put(`${ENDPOINTS.PATIENT.RESCHEDULE_APPOINTMENT}/${appointmentId}`, {
-        date: newDate,
-        time: newTime,
-      });
+      const response = await axiosInstance.patch(
+        `${ENDPOINTS.PATIENT.RESCHEDULE_APPOINTMENT(appointmentId)}`,
+        { newDate, newTime }
+      );
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data || 'Failed to reschedule appointment');
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
 
-// Initial state
+
+
 const initialState = {
   appointments: [],
   upcomingAppointments: [],
@@ -73,11 +79,11 @@ const initialState = {
   error: null,
 };
 
-// Helper to match appointment ID (_id or id)
+// Helper to match appointment ID 
 const matchesId = (app, id) => app._id === id || app.id === id;
 
 
-//  Slice
+
 const appointmentSlice = createSlice({
   name: 'appointments',
   initialState,
@@ -104,13 +110,15 @@ const appointmentSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // FETCH APPOINTMENTS
+      
       .addCase(fetchAppointments.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchAppointments.fulfilled, (state, action) => {
-        const appointmentsArray = action.payload.appointments; // extract the array
+        // console.log(action.payload)
+        // console.log(action.payload.appointments)
+        const appointmentsArray = action.payload; // extract the array
         state.appointments = appointmentsArray;
 
         const now = new Date().toISOString().split('T')[0];
@@ -130,7 +138,7 @@ const appointmentSlice = createSlice({
         state.error = action.payload;
       })
 
-      // 📦 BOOK APPOINTMENT
+      //BOOK APPOINTMENT
       .addCase(bookAppointment.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -147,31 +155,34 @@ const appointmentSlice = createSlice({
         state.error = action.payload;
       })
 
-      // 📦 CANCEL APPOINTMENT
+      // CANCEL APPOINTMENT
       .addCase(cancelAppointment.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(cancelAppointment.fulfilled, (state, action) => {
-        const cancelledId = action.payload;
-
-        const appointment = state.appointments.find(app => matchesId(app, cancelledId));
-        if (appointment) appointment.status = 'cancelled';
-
-        state.upcomingAppointments = state.upcomingAppointments.filter(
-          app => !matchesId(app, cancelledId)
-        );
-
-        state.loading = false;
+        const { appointmentId } = action.payload;
+        const appointment = state.appointments.find((a) => a._id === appointmentId);
+        if (appointment) {
+          appointment.status = 'cancelled';
+        }
       })
       .addCase(cancelAppointment.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(rescheduleAppointment.fulfilled, (state, action) => {
+        const updatedAppointment = action.payload;
+        const index = state.appointments.findIndex(app => app._id === updatedAppointment._id);
+        if (index !== -1) {
+          state.appointments[index] = updatedAppointment;
+        }
       });
+      
   },
 });
 
-// 🧾 Export actions
+//Export actions
 export const {
   selectAppointment,
   clearSelectedAppointment,
@@ -181,7 +192,7 @@ export const {
   clearBookingInfo,
 } = appointmentSlice.actions;
 
-// 📤 Export reducer
+//Export reducer
 export default appointmentSlice.reducer;
 
 
@@ -247,7 +258,7 @@ export default appointmentSlice.reducer;
 //   appointments: [],
 //   loading: false,
 //   error: null,
-//   selectedAppointmentId: null, // ✅ Add this
+//   selectedAppointmentId: null, // Add this
 // };
 
 // // Slice
@@ -255,7 +266,7 @@ export default appointmentSlice.reducer;
 //   name: 'appointments',
 //   initialState,
 //   reducers: {
-//     // ✅ Add reducer to select an appointment
+//     // Add reducer to select an appointment
 //     selectAppointment: (state, action) => {
 //       state.selectedAppointmentId = action.payload;
 //     },
@@ -321,7 +332,7 @@ export default appointmentSlice.reducer;
 //   },
 // });
 
-// // ✅ Export selectAppointment
+// // Export selectAppointment
 // export const { selectAppointment } = appointmentSlice.actions;
 
 // export default appointmentSlice.reducer;

@@ -111,7 +111,10 @@ const DoctorList = () => {
   const [specialization, setSpecialization] = useState('All Specializations');
 
   useEffect(() => {
+    console.log(doctors," bf doctorlist pagw")
     dispatch(fetchDoctors());
+    console.log(doctors," af doctorlist pagw")
+
   }, [dispatch]);
 
   const filteredDoctors = doctors.filter((doc) => {

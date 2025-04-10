@@ -21,12 +21,18 @@ const appointmentSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending', 'Confirmed', 'Completed', 'Cancelled'],
+    enum: ['Pending', 'Confirmed', 'rescheduled', 'Cancelled'],
     default: 'Pending',
   },
   reason: {
     type: String,
     required: false,
+  },
+  appointmentType: {
+    type: String,
+    enum: ['In-Person', 'Online'],
+    default: 'In-Person',
+    required: true,
   },
 }, { timestamps: true });
 

@@ -69,7 +69,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import DashboardHeader from '../dashboard/DashboardHeaders';
 import DashboardSidebar from '../dashboard/DashboardSidebar';
 import { useAppSelector } from '../../hooks/useAppSelector';
-import Cookies from 'js-cookie'; // 👈 NEW import
+import Cookies from 'js-cookie'; 
 
 const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -79,7 +79,7 @@ const MainLayout = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = Cookies.get('token'); // 👈 check cookie named "token"
+    const token = Cookies.get('token'); 
 
     if (!token && isAuthenticated === false) {
       navigate('/login');

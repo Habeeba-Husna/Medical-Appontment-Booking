@@ -8,16 +8,16 @@ import { sendNotification } from '../config/emailConfig.js';
 
 export const createAppointment = async (req, res) => {
     try {
-      const { doctorId, date, time, status } = req.body;
+      const { doctorId, date: newDate, time: newTime, status } = req.body;
       // const patientId = req.user._id;                        // Direct fetch frm authntictd user
       console.log("req.patient:", req.patient);
       console.log("doctorId:", doctorId);
-console.log("date:", date);
-console.log("time:", time);
+console.log("date:", newDate);
+console.log("time:", newTime);
        
       const patientId = req.patient._id;
 
-      if (!doctorId || !date || !time) {
+      if (!doctorId || !newDate || !newTime) {
         return res.status(400).json({ message: 'DoctorId, date, and time are required' });
       }
   
@@ -31,8 +31,8 @@ console.log("time:", time);
       const newAppointment = new Appointment({
         doctorId,
         patientId,
-        date,
-        time,
+        date: newDate, 
+        time: newTime,
         status: status || 'Pending',
       });
   
@@ -44,38 +44,97 @@ console.log("time:", time);
   };
   
 
+  // export const createAppointment = async (req, res) => {
+  //   try {
+  //     const { doctorId, date, time, status } = req.body;  // Removed the aliases
+  //     // const patientId = req.user._id;                        // Direct fetch frm authntictd user
+  //     console.log("req.patient:", req.patient);
+  //     console.log("doctorId:", doctorId);
+  //     console.log("date:", date);
+  //     console.log("time:", time);
+       
+  //     const patientId = req.patient._id;
+
+  //     if (!doctorId || !date || !time) {
+  //       return res.status(400).json({ message: 'DoctorId, date, and time are required' });
+  //     }
+  
+  //     const doctor = await Doctor.findById(doctorId);
+      
+  //     if (!doctor) {
+  //       return res.status(404).json({ message: 'Doctor not found' });
+  //     }
+  
+  //     const newAppointment = new Appointment({
+  //       doctorId,
+  //       patientId,
+  //       date,
+  //       time,
+  //       status: status || 'Pending',
+  //     });
+  
+  //     await newAppointment.save();
+  //     res.status(201).json({ message: 'Appointment created successfully', appointment: newAppointment });
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // };
+
 //  All Appointments with Filters
 
+// export const getAllAppointments = async (req, res) => {
+//     try {
+//       const { page = 1, limit = 10, status, doctorId, patientId } = req.query;
+//       const filter = {};
+  
+//       if (status) filter.status = status;
+//       if (doctorId) filter.doctorId = doctorId;
+//       if (patientId) filter.patientId = patientId;
+  
+//       const appointments = await Appointment.find(filter)
+//         .populate('doctorId', 'fullName specialization')
+//         .populate('patientId', 'fullName')
+//         .limit(limit * 1)
+//         .skip((page - 1) * limit);
+  
+//       const total = await Appointment.countDocuments(filter);
+  
+//       res.status(200).json({
+//         message: 'Appointments fetched successfully',
+//         appointments,
+//         total,
+//         page,
+//         totalPages: Math.ceil(total / limit),
+//       });
+//     } catch (error) {
+//       res.status(500).json({ message: error.message });
+//     }
+//   };
+  
 export const getAllAppointments = async (req, res) => {
-    try {
-      const { page = 1, limit = 10, status, doctorId, patientId } = req.query;
-      const filter = {};
-  
-      if (status) filter.status = status;
-      if (doctorId) filter.doctorId = doctorId;
-      if (patientId) filter.patientId = patientId;
-  
-      const appointments = await Appointment.find(filter)
-        .populate('doctorId', 'fullName specialization')
-        .populate('patientId', 'fullName')
-        .limit(limit * 1)
-        .skip((page - 1) * limit);
-  
-      const total = await Appointment.countDocuments(filter);
-  
-      res.status(200).json({
-        message: 'Appointments fetched successfully',
-        appointments,
-        total,
-        page,
-        totalPages: Math.ceil(total / limit),
-      });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+  console.log("xcvbnm   ...........")
+  try {
+    // Assuming you have patient info from auth middleware
+    console.log(req.user,"rewsted user")
+    console.log(req.patient,"reqsted pat........")
+    const patientId = req.user?.id;
+    console.log(patientId)
+    if (!patientId) {
+      return res.status(400).json({ message: 'Patient ID required' });
     }
-  };
-  
-  
+
+    const appointments = await Appointment.find({ patientId })
+      .populate('doctorId', 'fullName specialization')
+      .populate('patientId', 'fullName');
+
+    res.status(200).json({ appointments });
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    res.status(500).json({ message: 'Server error fetching appointments' });
+  }
+};
+
+
 export const updateAppointmentStatus = async (req, res) => {
     try {
       const { status } = req.body;
@@ -94,32 +153,75 @@ export const updateAppointmentStatus = async (req, res) => {
     }
   };
 
+// Cancel Appointment
+export const cancelAppointment = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
 
-  export const deleteAppointment = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const appointment = await Appointment.findByIdAndDelete(id);
-      if (!appointment) return res.status(404).json({ message: 'Appointment not found' });
-      res.status(200).json({ message: 'Appointment deleted successfully' });
-    } catch (error) {
-      handleError(res, error);
+    const appointment = await Appointment.findById(appointmentId);
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found' });
     }
-  };
 
+    // Optionally, check if already cancelled
+    if (appointment.status === 'cancelled') {
+      return res.status(400).json({ message: 'Appointment already cancelled' });
+    }
 
-  // export const getAppointmentsByPatient = async (req, res) => {
-  //   try {
-  //     const userId = req.user._id; // Use req.user._id instead of req.user.id
-  //     const appointments = await Appointment.find({ patientId: userId })
-  //     .populate("doctorId", "fullName email specialization experience");
-  //     res.status(200).json(appointments);
-  //   } catch (error) {
-  //     res.status(500).json({ message: error.message });
-  //   }
-  // };
-  
+    appointment.status = 'cancelled';
+    await appointment.save();
 
-  
+    res.status(200).json({ message: 'Appointment cancelled successfully', appointment });
+  } catch (error) {
+    console.error('Cancel Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const rescheduleAppointment = async (req, res) => {
+  console.log('Rescheduling appointment:', req.params.id, req.body);
+
+  try {
+    const appointmentId = req.params.id;
+    const { newDate, newTime } = req.body;
+
+    // Check for missing fields
+    if (!newDate || !newTime) {
+      return res.status(400).json({ message: 'New date and time are required.' });
+    }
+
+    // Find appointment by ID
+    const appointment = await Appointment.findById(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found.' });
+    }
+
+    // Check if new date/time is in the future
+const newDateTime = new Date(`${newDate}T${newTime}`);
+if (newDateTime < new Date()) {
+  return res.status(400).json({ message: 'New appointment time must be in the future' });
+}
+
+    // Update fields
+    appointment.date = newDate;
+    appointment.time = newTime;
+    appointment.status = 'rescheduled';
+
+    // Save updated appointment
+    await appointment.save();
+
+    res.status(200).json({
+      message: 'Appointment rescheduled successfully',
+      appointment,
+    });
+
+  } catch (error) {
+    console.error('Error in rescheduleAppointment:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+ 
   export const getAppointmentsByPatient = async (req, res) => {
     try {
       console.log(" Reached getAppointmentsByPatient controller");

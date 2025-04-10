@@ -280,14 +280,17 @@ import Doctor from '../models/doctorModel.js';
 import Admin from '../models/adminModel.js';
 
 export const authenticate = async (req, res, next) => {
+  console.log("in authenticate.....")
   try {
     const token = req.cookies.token;
-    
+    console.log(token,"token in auth")
     if (!token) {
-      return res.status(401).json({ message: 'Authentication required' });
+     
+      return res.status(401).json({ isAuthenticated: false, message: 'Not authenticated' });
     }
-
+    console.log("BEFORE AUTH.....")
     const decoded = verifyToken(token);
+    console.log(decoded,"decoded data")
     req.user = decoded;
     next();
   } catch (error) {
@@ -295,34 +298,9 @@ export const authenticate = async (req, res, next) => {
   }
 };
 
-export const authorize = (roles = []) => {
-  return async (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Unauthorized access' });
-    }
 
-    try {
-      let user;
-      switch (req.user.role) {
-        case 'patient':
-          user = await Patient.findById(req.user.id);
-          break;
-        case 'doctor':
-          user = await Doctor.findById(req.user.id);
-          break;
-        case 'admin':
-          user = await Admin.findById(req.user.id);
-          break;
-      }
 
-      if (!user || user.isBlocked) {
-        return res.status(403).json({ message: 'Account not available' });
-      }
 
-      req[req.user.role] = user;
-      next();
-    } catch (error) {
-      res.status(500).json({ message: 'Authentication failed' });
-    }
-  };
-};
+
+
+   

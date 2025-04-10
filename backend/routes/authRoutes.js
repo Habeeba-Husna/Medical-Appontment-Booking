@@ -59,7 +59,7 @@ const router = express.Router();
 
 router.post('/register', registerPatient);
 router.post('/login', loginUser);
-router.post('/refresh', refreshToken);
+router.post('/refreshtoken', refreshToken);
 router.post('/logout', logoutUser);
 
 export default router;
