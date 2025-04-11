@@ -1,5 +1,5 @@
 import React from 'react';
-import AppointmentBooking from '../components/appointment/AppointmentBooking';
+import AppointmentBooking from '../components/patient/appointment/AppointmentBooking';
 
 const BookAppointmentPage = () => {
   return (

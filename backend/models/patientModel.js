@@ -9,8 +9,10 @@ const patientSchema = new mongoose.Schema(
   age: { type: Number, required: true },
   gender: { type: String, required: true, enum: ['Male', 'Female', 'Other'] },
   medicalHistory: { type: String },
+  profilePhoto: { type: String },
   isVerified: { type: Boolean, default: false },
-  role: { type: String, default: 'patient' } 
+  role: { type: String, default: 'patient' } ,
+
 },
  { timestamps: true });
 

@@ -1,6 +1,6 @@
 import React from 'react';
-import QuickActions from '../components/dashboard/QuickActions';
-import UpcomingAppointments from '../components/dashboard/UpcomingAppointments';
+import QuickActions from '../components/patient/dashboard/QuickActions';
+import UpcomingAppointments from '../components/patient/dashboard/UpcomingAppointments';
 import { useAppSelector } from '../hooks/useAppSelector';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 

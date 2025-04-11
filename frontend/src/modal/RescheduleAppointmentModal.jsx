@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/Dialog";
-import { Button } from "../components/ui/Button";
+import { Button } from '../components/ui/Button';
 import { Input } from "../components/ui/Input";
 import { toast } from "react-toastify";
 
