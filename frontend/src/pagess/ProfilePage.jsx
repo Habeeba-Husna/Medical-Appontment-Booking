@@ -30,6 +30,14 @@ const ProfilePage  = ({ profile }) => {
     pastSurgeries: profile?.pastSurgeries || ""
   });
 
+  const getFullPhotoUrl = (photoPath) => {
+    if (!photoPath) return '';
+    return photoPath.startsWith('http')
+      ? photoPath
+      : `http://localhost:5000/${photoPath}`;
+  };
+  
+
     // Function to fetch updated profile
     const fetchUpdatedProfile = async () => {
       try {
@@ -159,7 +167,13 @@ const ProfilePage  = ({ profile }) => {
               <div className="relative mb-4 group">
               <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
     {tempPhoto ? (
-      <AvatarImage src={tempPhoto} alt="Uploading..." className="object-cover" />
+      // <AvatarImage src={tempPhoto} alt="Uploading..." className="object-cover" />
+      <AvatarImage
+  src={getFullPhotoUrl(profile?.profilePhoto)}
+  alt={profile?.fullName}
+  className="object-cover"
+/>
+
     ) : (
       <>
         <AvatarImage

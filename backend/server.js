@@ -117,6 +117,7 @@
 
 import express from 'express';
 import dotenv from 'dotenv';
+import path from 'path';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import cors from 'cors';
@@ -144,6 +145,11 @@ app.use('/api/patient', patientRoutes);
 // app.use('/api/doctor', doctorRoutes);
 app.use('/api/appointments', appointmentRoutes);
 
+// Serve static files from uploads directory
+const __dirname = path.resolve(); // Get current directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// app.use('/uploads', express.static(path.join(path.resolve(), 'uploads')));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
