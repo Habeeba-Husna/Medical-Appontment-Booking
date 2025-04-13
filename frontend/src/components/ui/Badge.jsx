@@ -1,29 +1,3 @@
-// import React from 'react';
-// import PropTypes from 'prop-types';
-// import clsx from 'clsx';
-
-// const variants = {
-//   default: 'bg-medical-primary text-white',
-//   outline: 'border border-medical-primary text-medical-primary',
-// };
-
-// const Badge = ({ children, variant = 'default', className }) => {
-//   return (
-//     <span className={clsx('px-2 py-1 rounded-md text-xs font-medium', variants[variant], className)}>
-//       {children}
-//     </span>
-//   );
-// };
-
-// Badge.propTypes = {
-//   children: PropTypes.node.isRequired,
-//   variant: PropTypes.oneOf(['default', 'outline']),
-//   className: PropTypes.string,
-// };
-
-// export default Badge;
-
-
 import React from "react";
 import { cva } from "class-variance-authority";
 import { cn } from "../../lib/utils";

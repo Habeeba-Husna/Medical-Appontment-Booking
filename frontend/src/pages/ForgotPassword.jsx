@@ -21,9 +21,13 @@ const ForgotPassword = () => {
       try {
         const response = await axiosInstance.post(ENDPOINTS.AUTH.FORGOT_PASSWORD, values);
         toast.success(response.data.message);
-        navigate("/reset-password");
+        // navigate("/reset-password");
+         // Navigate to OTP verification page
+    navigate("/verify-otp", { 
+      state: { email: values.email } 
+    });
       } catch (error) {
-        toast.error(error.response?.data?.message || "An error occurred");
+        toast.error(error.response?.data?.message ||  'Failed to send OTP. Please try again.');
       }
     },
   });

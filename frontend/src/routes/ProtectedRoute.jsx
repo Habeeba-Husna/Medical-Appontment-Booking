@@ -14,3 +14,16 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 };
 
 export default ProtectedRoute;
+
+
+// const ProtectedRoute = ({ children, role }) => {
+//   const user = // get user from state
+//   return user && user.role === role ? children : <Navigate to="/unauthorized" />;
+// };
+
+// // Usage
+// <Route path="/admin" element={
+//   <ProtectedRoute role="admin">
+//     <AdminPanel />
+//   </ProtectedRoute>
+// } />

@@ -206,19 +206,27 @@ import {
   // changePatientPassword
 } from '../controllers/patientController.js';
 // import upload from '../config/cloudinaryConfig.js';
+import { getPatientProfile,updatePatientProfile,uploadProfilePhoto  } from '../controllers/patientController.js';
+import { localUpload } from '../config/cloudinaryPhoto.js';
 
 const router = express.Router();
 
 router.get('/doctors',authenticate,authorizeRoles('patient'), getAllDoctors);
 router.get('/:id',authenticate,authorizeRoles('patient'), getDoctorById);
 router.get('/:id/details',authenticate,authorizeRoles('patient'), getSingleDoctorWithDetails);
-// router.get('/profile',authenticate,authorizeRoles('patient') , getPatientProfile);
-// router.put('/profile/update',authenticate,authorizeRoles('patient') , updatePatientProfile);
+
 router.get('/notifications',authenticate,authorizeRoles('patient'), getNotifications);
 
-
+router.get('/profile', authenticate, authorizeRoles('patient'), getPatientProfile);
+router.put('/profile/update', authenticate, authorizeRoles('patient'), updatePatientProfile);
+router.post('/upload-profile-photo', 
+  authenticate, 
+  authorizeRoles('patient'),
+  localUpload.single('profilePhoto'), 
+  uploadProfilePhoto
+);
 // router.route('/profile/photo').put(authenticate, upload.single('photo'), updatePatientPhoto);
 
-// router.route('/change-password') .put(authenticate, changePatientPassword);
+
 
 export default router;

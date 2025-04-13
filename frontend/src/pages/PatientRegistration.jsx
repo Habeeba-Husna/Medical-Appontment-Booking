@@ -51,33 +51,90 @@ const PatientRegistration = () => {
   
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Clear previous errors
+    setErrors({});
   
+    // Validate form
     let formErrors = {};
-    for (let field in formData) {
-      if (!formData[field]) {
-        formErrors[field] = "Required";
+    Object.keys(formData).forEach(field => {
+      if (!formData[field] && field !== 'medicalHistory') {
+        formErrors[field] = 'This field is required';
       }
-    }
+    });
   
-    setErrors(formErrors);
-  
-    if (Object.values(formErrors).some((error) => error)) {
-      return; // Stop form submission if there are errors
-    }
-  
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
       return;
     }
   
-    // Dispatch with Patient role
-    const result = await dispatch(registerUser({ formData, role: "Patient" }));
+    if (formData.password !== formData.confirmPassword) {
+      setErrors({ confirmPassword: 'Passwords do not match' });
+      return;
+    }
   
-    if (result?.payload?.message) {
-      alert(result.payload.message);
-      navigate("/login");
+    try {
+      const result = await dispatch(
+        registerUser({ 
+          formData: {
+            fullName: formData.fullName,
+            email: formData.email,
+            phoneNumber: formData.phoneNumber,
+            password: formData.password,
+            age: formData.age,
+            gender: formData.gender,
+            medicalHistory: formData.medicalHistory || undefined
+          },
+          role: "Patient" 
+        })
+      );
+  
+      if (result?.error) {
+        // Handle API validation errors
+        if (result.payload?.details) {
+          setErrors(result.payload.details);
+        } else {
+          alert(result.payload?.message || 'Registration failed');
+        }
+      } else {
+        alert('Registration successful! Please login.');
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      alert('An unexpected error occurred. Please try again.');
     }
   };
+  
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  
+  //   let formErrors = {};
+  //   for (let field in formData) {
+  //     if (!formData[field]) {
+  //       formErrors[field] = "Required";
+  //     }
+  //   }
+  
+  //   setErrors(formErrors);
+  
+  //   if (Object.values(formErrors).some((error) => error)) {
+  //     return; // Stop form submission if there are errors
+  //   }
+  
+  //   if (formData.password !== formData.confirmPassword) {
+  //     alert("Passwords do not match!");
+  //     return;
+  //   }
+  
+  //   // Dispatch with Patient role
+  //   const result = await dispatch(registerUser({ formData, role: "Patient" }));
+  
+  //   if (result?.payload?.message) {
+  //     alert(result.payload.message);
+  //     navigate("/login");
+  //   }
+  // };
   
   
   

@@ -1,66 +1,3 @@
-
-
-// import axios from 'axios';
-// import Cookies from 'js-cookie';
-
-// const axiosInstance = axios.create({
-//   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
-//   withCredentials: true,
-//   timeout: 10000,
-//   headers: {
-//     'Content-Type': 'application/json'
-//   }
-// });
-
-// // Request interceptor
-// axiosInstance.interceptors.request.use(config => {
-//   const token = Cookies.get('token');
-//   if (token) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });
-
-// // Response interceptor
-// axiosInstance.interceptors.response.use(
-//   response => response,
-//   async error => {
-//     const originalRequest = error.config;
-    
-//     if (error.response?.status === 401 && !originalRequest._retry) {
-//       originalRequest._retry = true;
-      
-//       try {
-//         const refreshToken = Cookies.get('refreshToken');
-//         const response = await axios.post(
-//           `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/refresh`,
-//           { refreshToken },
-//           { withCredentials: true }
-//         );
-        
-//         const { accessToken } = response.data;
-//         Cookies.set('token', accessToken);
-//         return axiosInstance(originalRequest);
-//       } catch (err) {
-//         Cookies.remove('token');
-//         Cookies.remove('refreshToken');
-//         window.location.href = '/login';
-//         return Promise.reject(err);
-//       }
-//     }
-    
-//     return Promise.reject(error);
-//   }
-// );
-
-// export default axiosInstance;
-
-
-
-
-
-
-
 import axios from "axios";
 
 const axiosInstance = axios.create({
@@ -85,44 +22,105 @@ const processQueue = (error, token = null) => {
     });
     failedQueue = [];
 };
-
 axiosInstance.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-        const originalRequest = error.config;
-      console.log("in axis instance..............")
-      console.log(error.response,"error mdg in access tokren")
-        // Handle 401 errors for expired tokens
-        if (error.response && error.response.status === 401){
-            if (isRefreshing) {
-                return new Promise((resolve, reject) => {
-                    failedQueue.push({ resolve, reject });
-                });
-            }
+  (response) => response,
+  async (error) => {
+      const originalRequest = error.config;
+    console.log("in axis instance..............")
+    console.log(error.response,"error mdg in access tokren")
+      // Handle 401 errors for expired tokens
+      if (error.response && error.response.status === 401){
+          if (isRefreshing) {
+              return new Promise((resolve, reject) => {
+                  failedQueue.push({ resolve, reject });
+              });
+          }
 
-            originalRequest._retry = true;
-            isRefreshing = true;
-            console.log("before instance api call")
-            try {
-                await axiosInstance.post("/auth/refreshtoken");
+          originalRequest._retry = true;
+          isRefreshing = true;
+          console.log("before instance api call")
+          try {
+              await axiosInstance.post("/auth/refreshtoken");
 
-                // Retry the original request after refreshing the token
-                isRefreshing = false;
-                return axiosInstance(originalRequest);
-            } catch (refreshError) {
-                isRefreshing = false;
-                processQueue(refreshError, null);
+              // Retry the original request after refreshing the token
+              isRefreshing = false;
+              return axiosInstance(originalRequest);
+          } catch (refreshError) {
+              isRefreshing = false;
+              processQueue(refreshError, null);
 
-                // Redirect to login if refresh fails
-                if (refreshError.response?.status === 401) {
-                    window.location.href = "/login";
-                }
-                return Promise.reject(refreshError);
-            }
-        }
+              // Redirect to login if refresh fails
+              if (refreshError.response?.status === 401) {
+                  window.location.href = "/login";
+              }
+              return Promise.reject(refreshError);
+          }
+      }
 
-        return Promise.reject(error);
-    }
+      return Promise.reject(error);
+  }
 );
 
 export default axiosInstance;
+
+
+// axiosInstance.interceptors.response.use(
+//     (response) => response,
+//     async (error) => {
+//       const originalRequest = error.config;
+      
+//       // Log error for debugging
+//       console.error("API Error:", {
+//         url: originalRequest.url,
+//         status: error.response?.status,
+//         message: error.response?.data?.message || error.message
+//       });
+  
+//       // Handle 404 specifically
+//       if (error.response?.status === 404) {
+//         return Promise.reject({
+//           message: 'Requested resource not found. Please check the URL.',
+//           code: 'RESOURCE_NOT_FOUND'
+//         });
+//       }
+  
+//       // Handle 401 errors for expired tokens
+//       if (error.response?.status === 401 && !originalRequest._retry) {
+//         if (isRefreshing) {
+//           return new Promise((resolve, reject) => {
+//             failedQueue.push({ resolve, reject });
+//           });
+//         }
+  
+//         originalRequest._retry = true;
+//         isRefreshing = true;
+  
+//         try {
+//           await axiosInstance.post("/auth/refresh-token");
+//           isRefreshing = false;
+//           processQueue(null, originalRequest);
+//           return axiosInstance(originalRequest);
+//         } catch (refreshError) {
+//           isRefreshing = false;
+//           processQueue(refreshError, null);
+          
+//           if (refreshError.response?.status === 401) {
+//             window.location.href = "/login";
+//           }
+//           return Promise.reject(refreshError);
+//         }
+//       }
+  
+//       // Format all other errors consistently
+//       return Promise.reject({
+//         message: error.response?.data?.message || 
+//                 'An unexpected error occurred. Please try again.',
+//         code: error.response?.status || 'UNKNOWN_ERROR',
+//         details: error.response?.data?.errors || undefined
+//       });
+//     }
+//   );
+//   export default axiosInstance;
+
+  
+

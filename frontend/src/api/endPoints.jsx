@@ -6,16 +6,11 @@ export const ENDPOINTS = {
     LOGIN: '/auth/login',
     LOGOUT: '/auth/logout',
     FORGOT_PASSWORD: '/auth/forgot-password',
+    VERIFY_OTP: '/auth/verify-otp',
     RESET_PASSWORD: '/auth/reset-password',
 
-
-    // LOGIN: "/auth/login",
     ADMIN_LOGIN: "/auth/admin-login",
-    // REGISTER_PATIENT: "/auth/patient-register",
-    // REGISTER_DOCTOR: "/auth/doctor-register",
-    // FORGOT_PASSWORD: "/auth/forgot-password",
-    // RESET_PASSWORD: "/auth/reset-password",
-    // LOGOUT: "/auth/logout",
+  
     REFRESH_TOKEN: "/auth/refresh-token",
     ME: "/auth/me",   //current logged-in user (Patient/Doctor/Admin)
   },
@@ -27,8 +22,9 @@ export const ENDPOINTS = {
       RESCHEDULE_APPOINTMENT: (id) => `/appointments/reschedule/${id}`,
       CANCEL_APPOINTMENT: (id) => `/appointments/${id}`,
       GET_APPOINTMENTS: '/appointments/appointments',
-      PROFILE: '/patients/profile',
-      UPDATE_PROFILE: '/patients/profile/update',
+      PROFILE: '/patient/profile',
+      // PROFILE:`/patient/${user._id}`,
+      UPDATE_PROFILE: '/patient/profile/update',
       NOTIFICATIONS: '/notifications',
 
 
@@ -42,11 +38,11 @@ export const ENDPOINTS = {
       // CANCEL_APPOINTMENT: '/patient/appointments/cancel',
       // NOTIFICATIONS: '/patient/notifications',
     },
-  DOCTOR: {
-    PROFILE: "/doctor/profile",
-    UPDATE_PROFILE: "/doctor/profile",
+  // DOCTOR: {
+  //   PROFILE: "/doctor/profile",
+  //   UPDATE_PROFILE: "/doctor/profile",
     
-  },
+  // },
 
   ADMIN: {
     // Doctor Management

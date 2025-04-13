@@ -7,7 +7,8 @@ export const fetchPatientProfile = createAsyncThunk(
   'patient/fetchProfile',
   async (_, thunkAPI) => {
     try {
-      const response = await axiosInstance.get(ENDPOINTS.PATIENT.PROFILE);
+      // const response = await axiosInstance.get(ENDPOINTS.PATIENT.PROFILE);
+      const response = await axiosInstance.get(`/api/patient/${user._id}`);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || 'Failed to fetch patient profile');
@@ -44,42 +45,6 @@ export const rateDoctor = createAsyncThunk(
   );
   
 
-
-
-
-//   // Update Patient Photo
-// export const updatePatientPhoto = createAsyncThunk(
-//   'patient/updatePhoto',
-//   async (formData, thunkAPI) => {
-//     try {
-//       const response = await axiosInstance.put(ENDPOINTS.PATIENT.UPDATE_PHOTO, formData, {
-//         headers: {
-//           'Content-Type': 'multipart/form-data',
-//         },
-//       });
-//       return response.data;
-//     } catch (error) {
-//       return thunkAPI.rejectWithValue(error.response?.data || 'Failed to update photo');
-//     }
-//   }
-// );
-
-// // Change Password
-// export const changePassword = createAsyncThunk(
-//   'patient/changePassword',
-//   async (passwordData, thunkAPI) => {
-//     try {
-//       const response = await axiosInstance.put(ENDPOINTS.PATIENT.CHANGE_PASSWORD, passwordData);
-//       return response.data;
-//     } catch (error) {
-//       return thunkAPI.rejectWithValue(error.response?.data || 'Failed to change password');
-//     }
-//   }
-// );
-
-
-
-
 // Initial State
 const initialState = {
   profile: {
@@ -97,26 +62,6 @@ const initialState = {
   },
   loading: false,
   error: null,
-
-
-
-
-  // patient: null,
-  // photoStatus: {
-  //   loading: false,
-  //   success: null,
-  //   error: null,
-  // },
-  // passwordStatus: {
-  //   loading: false,
-  //   success: null,
-  //   error: null,
-  // },
-
-  
-
-
-
 };
 
 // Slice
@@ -173,53 +118,7 @@ const patientSlice = createSlice({
   .addCase(rateDoctor.rejected, (state, action) => {
     state.ratingStatus.loading = false;
     state.ratingStatus.error = action.payload || 'Rating failed';
-  })
-  
-  
-
-
-  
-  
-  
-//   // UPDATE PHOTO
-// .addCase(updatePatientPhoto.pending, (state) => {
-//   state.photoStatus.loading = true;
-//   state.photoStatus.success = null;
-//   state.photoStatus.error = null;
-// })
-// .addCase(updatePatientPhoto.fulfilled, (state, action) => {
-//   state.photoStatus.loading = false;
-//   state.photoStatus.success = action.payload.message || 'Photo updated successfully';
-// })
-// .addCase(updatePatientPhoto.rejected, (state, action) => {
-//   state.photoStatus.loading = false;
-//   state.photoStatus.error = action.payload;
-// })
-
-// // CHANGE PASSWORD
-// .addCase(changePassword.pending, (state) => {
-//   state.passwordStatus.loading = true;
-//   state.passwordStatus.success = null;
-//   state.passwordStatus.error = null;
-// })
-// .addCase(changePassword.fulfilled, (state, action) => {
-//   state.passwordStatus.loading = false;
-//   state.passwordStatus.success = action.payload.message || 'Password changed successfully';
-// })
-// .addCase(changePassword.rejected, (state, action) => {
-//   state.passwordStatus.loading = false;
-//   state.passwordStatus.error = action.payload;
-// })
-
-
-
-  
-  
-  
-  
-  
-  ;
-  
+  });
   },
 });
 

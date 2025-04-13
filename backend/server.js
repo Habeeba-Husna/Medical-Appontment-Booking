@@ -122,7 +122,8 @@ import authRoutes from './routes/authRoutes.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import patientRoutes from './routes/patientRoutes.js';
-import doctorRoutes from './routes/doctorRoutes.js';
+// import profileRoutes from './routes/profileRoutes.js';
+// import doctorRoutes from './routes/doctorRoutes.js';
 import appointmentRoutes from './routes/appointmentRoutes.js';
 dotenv.config();
 connectDB();
@@ -139,6 +140,7 @@ app.use(cors({
 app.use('/api/auth', authRoutes);
 
 app.use('/api/patient', patientRoutes);
+// app.use('/api/patient', profileRoutes);
 // app.use('/api/doctor', doctorRoutes);
 app.use('/api/appointments', appointmentRoutes);
 

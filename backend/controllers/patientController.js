@@ -11,50 +11,118 @@ const computeNextAvailableSlot = (slots) => {
   return `${next.day} at ${next.startTime}`;
 };
 
-
-// // Get logged-in patient profile
-// export const getPatientProfile = async (req, res) => {
-//   try {
-//     const patient = await Patient.findById(req.patient._id).select('-password');
-//     if (!patient) return res.status(404).json({ message: 'Patient not found' });
-//     res.status(200).json(patient);
-//   } catch (error) {
-//     console.error('Error in getPatientProfile:', error);
-//     handleError(res, error);
-//   }
-// };
-
-// // Update patient profile
-// export const updatePatientProfile = async (req, res) => {
-//   try {
-//     const patient = await Patient.findById(req.patient._id);
-//     if (!patient) return res.status(404).json({ message: 'Patient not found' });
-
-//     const fields = ['fullName', 'email', 'phoneNumber', 'age', 'gender', 'medicalHistory'];
-//     fields.forEach(field => {
-//       if (req.body[field]) patient[field] = req.body[field];
-//     });
-
-//     await patient.save();
-//     res.status(200).json({ message: 'Profile updated successfully', patient });
-//   } catch (error) {
-//     console.error('Error in updatePatientProfile:', error);
-//     handleError(res, error);
-//   }
-// };
-
-
-export const uploadProfilePhoto = async (req, res) => {
+// Get Patient Profile
+export const getPatientProfile = async (req, res) => {
   try {
-    if (!req.file || !req.file.path) {
-      return res.status(400).json({ message: 'No file uploaded or invalid file' });
+    // req.user is set by the authenticate middleware
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Not authenticated' });
     }
 
+    const patient = await Patient.findById(req.user.id)
+      .select('-password -__v -createdAt -updatedAt');
+
+    if (!patient) {
+      return res.status(404).json({ message: 'Patient not found' });
+    }
+
+    res.status(200).json(patient);
+  } catch (error) {
+    console.error('Error fetching patient profile:', error);
+    res.status(500).json({ 
+      message: 'Failed to fetch patient profile',
+      error: error.message 
+    });
+  }
+};
+
+// Update Patient Profile
+export const updatePatientProfile = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+
+    const { fullName, email, phoneNumber, age, gender, medicalHistory } = req.body;
+
+    // Basic validation
+    if (!fullName || !email || !phoneNumber) {
+      return res.status(400).json({ message: 'Required fields are missing' });
+    }
+
+    const updateData = {
+      fullName,
+      email,
+      phoneNumber,
+      age,
+      gender,
+      medicalHistory
+    };
+
     const updatedPatient = await Patient.findByIdAndUpdate(
-      req.patient._id,
+      req.user.id,
+      updateData,
+      { new: true, runValidators: true }
+    ).select('-password -__v');
+
+    if (!updatedPatient) {
+      return res.status(404).json({ message: 'Patient not found' });
+    }
+
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      patient: updatedPatient
+    });
+  } catch (error) {
+    console.error('Error updating patient profile:', error);
+    
+    // Handle duplicate email error
+    if (error.code === 11000 && error.keyPattern?.email) {
+      return res.status(400).json({ 
+        message: 'Email already exists',
+        error: 'Duplicate email' 
+      });
+    }
+
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        message: 'Validation failed',
+        error: error.message 
+      });
+    }
+
+    res.status(500).json({ 
+      message: 'Failed to update profile',
+      error: error.message 
+    });
+  }
+};
+
+export const uploadProfilePhoto = async (req, res) => {
+  console.log('Upload profile photo route hit');
+  try {
+    // Use req.user instead of req.patient since that's what authenticate sets
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+
+    if (!req.file) {
+      console.log("Authenticated user ID:", req.user.id);
+
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+    
+
+    const updatedPatient = await Patient.findByIdAndUpdate(
+      req.user.id, // Changed from req.patient._id
       { profilePhoto: req.file.path },
       { new: true }
     ).select('-password');
+
+    if (!updatedPatient) {
+      return res.status(404).json({ message: 'Patient not found' });
+    }
 
     res.status(200).json({
       message: 'Profile photo uploaded successfully',
@@ -62,10 +130,21 @@ export const uploadProfilePhoto = async (req, res) => {
     });
   } catch (error) {
     console.error('Error uploading profile photo:', error);
-    res.status(500).json({ message: 'Something went wrong during upload' });
+    
+    if (req.file?.path) {
+      try {
+        await cloudinary.uploader.destroy(req.file.filename);
+      } catch (cleanupError) {
+        console.error('Error cleaning up file:', cleanupError);
+      }
+    }
+    
+    res.status(500).json({ 
+      message: 'Failed to upload profile photo',
+      error: error.message 
+    });
   }
 };
-
 
 // Get all patients (Admin)
 export const getAllPatients = async (req, res) => {
@@ -120,7 +199,7 @@ export const unblockPatient = async (req, res) => {
   }
 };
 
-// Dummy: Get notifications
+// Get notifications
 export const getNotifications = async (req, res) => {
   try {
     res.status(200).json({ message: 'Notifications feature coming soon' });
@@ -129,60 +208,3 @@ export const getNotifications = async (req, res) => {
     handleError(res, error);
   }
 };
-
-
-
-
-// export const getPatientProfile = async (req, res) => {
-//   try {
-//     const patient = await User.findById(req.userId);
-//     if (!patient || patient.role !== 'patient') return res.status(404).json({ message: 'Patient not found' });
-//     res.json(patient);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
-
-
-// // Update Patient Profile
-// export const updatePatientProfile = async (req, res) => {
-//   const { fullName, phoneNumber, age, gender, medicalHistory } = req.body;
-
-//   try {
-//     const patient = await User.findById(req.userId);
-//     if (!patient || patient.role !== 'patient') {
-//       return res.status(404).json({ message: 'Patient not found' });
-//     }
-
-//     patient.fullName = fullName || patient.fullName;
-//     patient.phoneNumber = phoneNumber || patient.phoneNumber;
-//     patient.age = age || patient.age;
-//     patient.gender = gender || patient.gender;
-//     patient.medicalHistory = medicalHistory || patient.medicalHistory;
-
-//     const updatedPatient = await patient.save();
-//     res.json({ message: 'Profile updated successfully', updatedPatient });
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
-
-
-
-
-// // Get appointments by doctor or patient
-// export const getAppointmentsByUser = async (req, res) => {
-//   try {
-//     const { doctorId, patientId } = req.query;
-
-//     const filter = {};
-//     if (doctorId) filter.doctorId = doctorId;
-//     if (patientId) filter.patientId = patientId;
-
-//     const appointments = await Appointment.find(filter).populate('doctorId', 'fullName specialization').populate('patientId', 'fullName');
-
-//     res.status(200).json({ message: 'Appointments fetched successfully', appointments });
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };

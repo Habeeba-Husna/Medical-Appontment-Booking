@@ -50,16 +50,37 @@
 import express from 'express';
 import {
   registerPatient,
+  registerDoctor,
   loginUser,
   refreshToken,
-  logoutUser
+  logoutUser,
+  forgotPassword,
+  verifyOTP,
+  resetPassword
 } from '../controllers/authController.js';
+
+
+import { upload } from '../config/cloudinaryConfig.js';
 
 const router = express.Router();
 
-router.post('/register', registerPatient);
+
+// Registration Routes
+router.post('/register/patient', registerPatient);
+// router.post('/register/doctor', upload.array('documents'), registerDoctor);
+router.post('/register/doctor', upload.array('documents', 5), registerDoctor);
+
+// Login Route
 router.post('/login', loginUser);
+// Password Reset Routes
+router.post('/forgot-password', forgotPassword );
+router.post('/verify-otp', verifyOTP); 
+router.post('/reset-password', resetPassword );
+
+// Token Route
 router.post('/refreshtoken', refreshToken);
+
+// Logout Route
 router.post('/logout', logoutUser);
 
 export default router;

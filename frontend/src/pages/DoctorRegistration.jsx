@@ -22,17 +22,19 @@ const DoctorRegistration = () => {
     documents: null,
   });
 
-  const [errors, setErrors] = useState({
-    fullName: "",
-    email: "",
-    phoneNumber: "",
-    password: "",
-    specialization: "",
-    experience: "",
-    qualifications: "",
-    clinicDetails: "",
-    documents: "",
-  });
+  // const [errors, setErrors] = useState({
+  //   fullName: "",
+  //   email: "",
+  //   phoneNumber: "",
+  //   password: "",
+  //   specialization: "",
+  //   experience: "",
+  //   qualifications: "",
+  //   clinicDetails: "",
+  //   documents: "",
+  // });
+
+  const [errors, setErrors] = useState({});
 
 
   const handleChange = (e) => {
@@ -45,26 +47,6 @@ const DoctorRegistration = () => {
       setFormData({ ...formData, [name]: value });
     }
   };
-
-  // const handleChange = (e) => {
-  //   const { name, value, files } = e.target;
-  
-  //   if (name === "documents") {
-  //     setFormData({ ...formData, documents: files });
-  //   } else if (name.startsWith("clinicDetails.")) {
-  //     const field = name.split(".")[1];
-  //     setFormData(prev => ({
-  //       ...prev,
-  //       clinicDetails: {
-  //         ...prev.clinicDetails,
-  //         [field]: value
-  //       }
-  //     }));
-  //   } else {
-  //     setFormData({ ...formData, [name]: value });
-  //   }
-  // };
-  
 
   const handleBlur = (e) => {
     const { name, value } = e.target;
@@ -88,18 +70,30 @@ const DoctorRegistration = () => {
     let isValid = true;
 
     // Check required fields
-    Object.keys(formData).forEach(key => {
+    // Object.keys(formData).forEach(key => {
+    //   if (!formData[key] && key !== "documents") {
+    //     newErrors[key] = "Required";
+    //     isValid = false;
+    //   }
+    // });
+     // Special validation for documents (optional here)
+    //  if (!formData.documents) {
+    //   newErrors.documents = "Please upload verification documents";
+    //   isValid = false;
+    // }
+
+    Object.keys(formData).forEach((key) => {
       if (!formData[key] && key !== "documents") {
         newErrors[key] = "Required";
         isValid = false;
       }
     });
 
-    // Special validation for documents (optional here)
-    if (!formData.documents) {
+    if (!formData.documents || formData.documents.length === 0) {
       newErrors.documents = "Please upload verification documents";
       isValid = false;
     }
+
 
     setErrors(newErrors);
     return isValid;
@@ -108,62 +102,104 @@ const DoctorRegistration = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    if (!validateForm()) return;
     
-    const data = new FormData();
-  
-    // Append all regular fields
-    Object.entries(formData).forEach(([key, value]) => {
-      if (key !== "documents") {
-        data.append(key, value);
-      }
-    });
-
-  //    // Append all non-file fields
-  // Object.entries(formData).forEach(([key, value]) => {
-  //   if (key === "clinicDetails") {
-  //     data.append("clinicDetails", JSON.stringify(value));
-  //   } else if (key !== "documents") {
-  //     data.append(key, value);
-  //   }
-  // });
-  
-    // Append files
-    if (formData.documents && formData.documents.length > 0) {
-      Array.from(formData.documents).forEach(file => {
-        data.append("documents", file);
-      });
-    } else {
-      alert("Please upload at least one document");
-      return;
-    }
-  
     try {
-      const result = await dispatch(registerUser({ 
-        formData: data, 
-        role: "Doctor" 
-      }));
-
-      console.log(result,"result...............");
-      // if (result?.payload?.success || result?.payload?.status === 201) {
-      //   alert("Doctor registered successfully. Waiting for admin approval. Redirecting to login page.");
-
-      //   console.log("Navigation Attempt");
-      //    setTimeout(() => navigate("/login"), 500);
-      // } else {
-      //   alert(result.payload?.message || "Registration failed. Please try again.");
-      // }
-      if (result?.type === 'auth/registerUser/fulfilled') {
-        alert(result?.payload?.message || "Doctor registered successfully. Waiting for admin approval.");
-        navigate("/login");
-      } else {
-        alert(result?.payload?.message || "Registration failed. Please try again.");
-      }
+      const formDataToSend = new FormData();
       
+      // Append all fields
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key === 'documents') {
+          Array.from(value).forEach(file => {
+            formDataToSend.append('documents', file);
+          });
+        } else if (value !== null && value !== undefined) {
+          formDataToSend.append(key, value);
+        }
+      });
+  
+      const result = await dispatch(
+        registerUser({ 
+          formData: formDataToSend, 
+          role: "Doctor" 
+        })
+      );
+  
+      if (result?.error) {
+        // Handle API validation errors
+        if (result.payload?.details) {
+          setErrors(result.payload.details);
+        } else {
+          alert(result.payload?.message || 'Registration failed');
+        }
+      } else {
+        alert('Doctor registration submitted for approval!');
+        navigate('/login');
+      }
     } catch (error) {
-      console.error("Registration error:", error);
-      alert("An error occurred during registration. Please try again.");
+      console.error('Registration error:', error);
+      alert('An unexpected error occurred. Please try again.');
     }
   };
+
+  
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     if (!validateForm()) return;
+    
+//     const data = new FormData();
+  
+//     // Append all regular fields
+//     // Object.entries(formData).forEach(([key, value]) => {
+//     //   if (key !== "documents") {
+//     //     data.append(key, value);
+//     //   }
+//     // });
+
+// // Append fields
+// Object.entries(formData).forEach(([key, value]) => {
+//   if (key === "documents" && value?.length > 0) {
+//     Array.from(value).forEach((file) => {
+//       data.append("documents", file); // or "documents[]" based on backend
+//     });
+//   } else {
+//     data.append(key, value);
+//   }
+// });
+  
+//     // // Append files
+//     // if (formData.documents && formData.documents.length > 0) {
+//     //   Array.from(formData.documents).forEach(file => {
+//     //     data.append("documents", file);
+//     //   });
+//     // } else {
+//     //   alert("Please upload at least one document");
+//     //   return;
+//     // }
+  
+//     try {
+//       const result = await dispatch(registerUser({ 
+//         formData: data, 
+//         role: "Doctor" 
+//       })
+//     );
+
+//       console.log(result,"result...............");
+    
+//       if (result?.type === 'auth/registerUser/fulfilled') {
+//         alert(result?.payload?.message || "Doctor registered successfully. Waiting for admin approval.");
+//         navigate("/login");
+//       } else {
+//         alert(result?.payload?.message || "Registration failed. Please try again.");
+//       }
+      
+//     } catch (error) {
+//       console.error("Registration error:", error);
+//       alert("An error occurred during registration. Please try again.");
+//     }
+//   };
  
   return (
     <div className="flex justify-center items-center py-12 sm:px-6 lg:px-8 min-h-screen bg-gray-100">
@@ -178,148 +214,38 @@ const DoctorRegistration = () => {
 
           <form onSubmit={handleSubmit} encType="multipart/form-data" noValidate>
 
-            {/* Full Name */}
-            <div className="mb-4">
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                required
-                placeholder="Full Name *"
-                className="bg-white text-black rounded-md w-full p-4 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              {errors.fullName && (
-                <p className="text-red-500 text-sm mt-2">{errors.fullName}</p>
-              )}
-            </div>
 
-            {/* Email */}
-            <div className="mb-4">
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                required
-                placeholder="Email *"
-                className="bg-white text-black rounded-md w-full p-4 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              {errors.email && (
-                <p className="text-red-500 text-sm mt-2">{errors.email}</p>
-              )}
-            </div>
+          {/* Input Fields */}
+          {[
+              { name: "fullName", placeholder: "Full Name" },
+              { name: "email", type: "email", placeholder: "Email" },
+              { name: "password", type: "password", placeholder: "Password" },
+              { name: "phoneNumber", type: "tel", placeholder: "Phone Number" },
+              { name: "specialization", placeholder: "Specialization" },
+              { name: "experience", type: "number", placeholder: "Experience (Years)" },
+              { name: "qualifications", placeholder: "Qualifications" },
+              { name: "clinicDetails", placeholder: "Clinic Details" },
+            ].map(({ name, type = "text", placeholder }) => (
+              <div className="mb-4" key={name}>
 
-            {/* Password */}
-            <div className="mb-4">
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                required
-                placeholder="Password *"
-                className="bg-white text-black rounded-md w-full p-4 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              {errors.password && (
-                <p className="text-red-500 text-sm mt-2">{errors.password}</p>
-              )}
-            </div>
-
-            {/* Phone Number & Specialization */}
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/2">
-                <input
-                  type="tel"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
+<input
+                  type={type}
+                  name={name}
+                  value={formData[name]}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  placeholder="Phone Number *"
-                  maxLength={10}
-                  required
-                  pattern="\d*"
+                  placeholder={`${placeholder} *`}
                   className="bg-white text-black rounded-md w-full p-4 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
                 />
-                {errors.phoneNumber && (
-                  <p className="text-red-500 text-sm mt-2">{errors.phoneNumber}</p>
+                {errors[name] && (
+                  <p className="text-red-500 text-sm mt-2">{errors[name]}</p>
                 )}
               </div>
+               ))}
 
-              <div className="w-1/2">
-                <input
-                  type="text"
-                  name="specialization"
-                  value={formData.specialization}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  required
-                  placeholder="Specialization *"
-                  className="bg-white text-black rounded-md w-full p-4 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-                {errors.specialization && (
-                  <p className="text-red-500 text-sm mt-2">{errors.specialization}</p>
-                )}
-              </div>
-            </div>
 
-            {/* Experience & Qualifications */}
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/2">
-                <input
-                  type="number"
-                  name="experience"
-                  value={formData.experience}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  required
-                  placeholder="Experience (Years) *"
-                  min="0"
-                  className="bg-white text-black rounded-md w-full p-4 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-                {errors.experience && (
-                  <p className="text-red-500 text-sm mt-2">{errors.experience}</p>
-                )}
-              </div>
 
-              <div className="w-1/2">
-                <input
-                  type="text"
-                  name="qualifications"
-                  value={formData.qualifications}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  required
-                  placeholder="Qualifications *"
-                  className="bg-white text-black rounded-md w-full p-4 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-                {errors.qualifications && (
-                  <p className="text-red-500 text-sm mt-2">{errors.qualifications}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Clinic Details */}
-            <div className="mb-4">
-              <input
-                type="text"
-                name="clinicDetails"
-                value={formData.clinicDetails}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                required
-                placeholder="Clinic/Hospital Details *"
-                className="bg-white text-black rounded-md w-full p-4 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              {errors.clinicDetails && (
-                <p className="text-red-500 text-sm mt-2">{errors.clinicDetails}</p>
-              )}
-            </div>
-
-            {/* Documents */}
+            {/* Document Upload */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Upload Verification Documents (License, ID Proof) *
@@ -337,7 +263,7 @@ const DoctorRegistration = () => {
                   file:text-sm file:font-semibold
                   file:bg-indigo-50 file:text-indigo-700
                   hover:file:bg-indigo-100"
-                required
+                // required
               />
               {errors.documents && (
                 <p className="text-red-500 text-sm mt-2">{errors.documents}</p>
@@ -376,3 +302,150 @@ const DoctorRegistration = () => {
 };
 
 export default DoctorRegistration;
+
+
+
+
+
+
+
+            {/* Full Name */}
+            {/* <div className="mb-4">
+              <input
+                type="text"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                required
+                placeholder="Full Name *"
+                className="bg-white text-black rounded-md w-full p-4 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              {errors.fullName && (
+                <p className="text-red-500 text-sm mt-2">{errors.fullName}</p>
+              )}
+            </div> */}
+
+            {/* Email */}
+            {/* <div className="mb-4">
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                required
+                placeholder="Email *"
+                className="bg-white text-black rounded-md w-full p-4 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-2">{errors.email}</p>
+              )}
+            </div> */}
+
+            {/* Password */}
+            {/* <div className="mb-4">
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                required
+                placeholder="Password *"
+                className="bg-white text-black rounded-md w-full p-4 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-2">{errors.password}</p>
+              )}
+            </div> */}
+
+            {/* Phone Number & Specialization */}
+            {/* <div className="flex space-x-4 mb-4">
+              <div className="w-1/2">
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder="Phone Number *"
+                  maxLength={10}
+                  required
+                  pattern="\d*"
+                  className="bg-white text-black rounded-md w-full p-4 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                {errors.phoneNumber && (
+                  <p className="text-red-500 text-sm mt-2">{errors.phoneNumber}</p>
+                )}
+              </div> */}
+
+              {/* <div className="w-1/2">
+                <input
+                  type="text"
+                  name="specialization"
+                  value={formData.specialization}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  required
+                  placeholder="Specialization *"
+                  className="bg-white text-black rounded-md w-full p-4 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                {errors.specialization && (
+                  <p className="text-red-500 text-sm mt-2">{errors.specialization}</p>
+                )}
+              </div>
+            </div> */}
+
+            {/* Experience & Qualifications */}
+            {/* <div className="flex space-x-4 mb-4">
+              <div className="w-1/2">
+                <input
+                  type="number"
+                  name="experience"
+                  value={formData.experience}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  required
+                  placeholder="Experience (Years) *"
+                  min="0"
+                  className="bg-white text-black rounded-md w-full p-4 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                {errors.experience && (
+                  <p className="text-red-500 text-sm mt-2">{errors.experience}</p>
+                )}
+              </div> */}
+
+              {/* <div className="w-1/2">
+                <input
+                  type="text"
+                  name="qualifications"
+                  value={formData.qualifications}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  required
+                  placeholder="Qualifications *"
+                  className="bg-white text-black rounded-md w-full p-4 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                {errors.qualifications && (
+                  <p className="text-red-500 text-sm mt-2">{errors.qualifications}</p>
+                )}
+              </div>
+            </div> */}
+
+            {/* Clinic Details */}
+            {/* <div className="mb-4">
+              <input
+                type="text"
+                name="clinicDetails"
+                value={formData.clinicDetails}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                required
+                placeholder="Clinic/Hospital Details *"
+                className="bg-white text-black rounded-md w-full p-4 border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              {errors.clinicDetails && (
+                <p className="text-red-500 text-sm mt-2">{errors.clinicDetails}</p>
+              )}
+            </div> */}

@@ -5,24 +5,66 @@ import Cookies from 'js-cookie';
 import { ENDPOINTS } from '../../api/endPoints';
 
 // Register User (Patient or Doctor)
+
 export const registerUser = createAsyncThunk(
   'auth/registerUser',
   async ({ formData, role }, { rejectWithValue }) => {
     try {
-      const endpoint =
-        role === 'Patient'
-          ? ENDPOINTS.AUTH.REGISTER_PATIENT
-          : ENDPOINTS.AUTH.REGISTER_DOCTOR;
+      const endpoint = role === 'Patient' 
+        ? ENDPOINTS.AUTH.REGISTER_PATIENT 
+        : ENDPOINTS.AUTH.REGISTER_DOCTOR;
 
-      const response = await axiosInstance.post(endpoint, formData);
+      // Handle FormData differently from regular JSON
+      const config = {};
+      if (formData instanceof FormData) {
+        config.headers = {
+          'Content-Type': 'multipart/form-data'
+        };
+      }
+
+      const response = await axiosInstance.post(endpoint, formData, config);
       return response.data;
+
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.message || error?.message || 'Something went wrong'
-      );
+      // Enhanced error handling
+      let errorMessage = 'Registration failed';
+      let errorDetails = null;
+
+      if (error.response) {
+        errorMessage = error.response.data?.message || errorMessage;
+        errorDetails = error.response.data?.errors || null;
+      } else if (error.message.includes('Network Error')) {
+        errorMessage = 'Network error. Please check your connection.';
+      }
+
+      return rejectWithValue({
+        message: errorMessage,
+        details: errorDetails,
+        code: error.response?.status || 500
+      });
     }
   }
 );
+
+
+// export const registerUser = createAsyncThunk(
+//   'auth/registerUser',
+//   async ({ formData, role }, { rejectWithValue }) => {
+//     try {
+//       const endpoint =
+//         role === 'Patient'
+//           ? ENDPOINTS.AUTH.REGISTER_PATIENT
+//           : ENDPOINTS.AUTH.REGISTER_DOCTOR;
+
+//       const response = await axiosInstance.post(endpoint, formData);
+//       return response.data;
+//     } catch (error) {
+//       return rejectWithValue(
+//         error?.response?.data?.message || error?.message || 'Something went wrong'
+//       );
+//     }
+//   }
+// );
 
 // Forgot Password
 export const forgotPassword = createAsyncThunk(
@@ -51,17 +93,38 @@ export const resetPassword = createAsyncThunk(
 );
 
 // Login User
+// export const loginUser = createAsyncThunk(
+//   'auth/login',
+//   async (credentials, { rejectWithValue }) => {
+//     try {
+//       const response = await axiosInstance.post(ENDPOINTS.AUTH.LOGIN, credentials);
+//       return response.data;
+//     } catch (error) {
+//       return rejectWithValue(error.response?.data || 'Login failed');
+//     }
+//   }
+// );
+
 export const loginUser = createAsyncThunk(
-  'auth/login',
-  async (credentials, { rejectWithValue }) => {
+  'auth/loginUser',
+  async ({ email, password, role }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(ENDPOINTS.AUTH.LOGIN, credentials);
-      return response.data;
+      const response = await axiosInstance.post(ENDPOINTS.AUTH.LOGIN, {
+        email,
+        password,
+        role,
+      });
+
+      // Your backend sends userData inside response.data.data
+      return response.data.data.token; 
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Login failed');
+      return rejectWithValue(
+        error.response?.data?.message || 'Login failed. Please try again.'
+      );
     }
   }
 );
+
 
 // Logout User
 export const logoutUser = createAsyncThunk(

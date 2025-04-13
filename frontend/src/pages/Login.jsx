@@ -151,10 +151,10 @@
 //         {/* Error Display */}
 //         {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
 
-//         {/* Forgot Password */}
-//         <p className="text-sm text-center mb-4">
-//           <a href="/forgot-password" className="text-blue-500 hover:underline">Forgot password?</a>
-//         </p>
+        // {/* Forgot Password */}
+        // <p className="text-sm text-center mb-4">
+        //   <a href="/forgot-password" className="text-blue-500 hover:underline">Forgot password?</a>
+        // </p>
 
 //         {/* Submit Button */}
 //         <button
@@ -296,6 +296,13 @@ const Login = () => {
      
                 {/* Error Display */}
                 {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
+
+                
+        {/* Forgot Password */}
+        <p className="text-sm text-center mb-4">
+          <a href="/forgot-password" className="text-blue-500 hover:underline">Forgot password?</a>
+        </p>
+
 
 {/* Submit Button */}
 <button

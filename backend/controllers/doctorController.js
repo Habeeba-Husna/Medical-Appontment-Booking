@@ -133,7 +133,7 @@ export const getSingleDoctorWithDetails = async (req, res) => {
       nextAvailable,
     });
   } catch (error) {
-    console.error('❌ Error in getSingleDoctorWithDetails:', error);
+    console.error(' Error in getSingleDoctorWithDetails:', error);
     handleError(res, error);
   }
 };
@@ -157,53 +157,53 @@ export const rateDoctor = async (req, res) => {
     await doctor.save();
     res.status(200).json({ message: 'Rating submitted successfully', updatedDoctor: doctor });
   } catch (error) {
-    console.error('❌ Error in rateDoctor:', error);
+    console.error('Error in rateDoctor:', error);
     res.status(500).json({ message: 'Server error while rating doctor' });
   }
 };
 
 
-export const getDoctorProfile = async (req, res) => {
-    try {
-      const doctor = await User.findById(req.userId);
-      if (!doctor || doctor.role !== 'doctor') return res.status(404).json({ message: 'Doctor not found' });
-      res.json(doctor);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  };
+// export const getDoctorProfile = async (req, res) => {
+//     try {
+//       const doctor = await User.findById(req.userId);
+//       if (!doctor || doctor.role !== 'doctor') return res.status(404).json({ message: 'Doctor not found' });
+//       res.json(doctor);
+//     } catch (error) {
+//       res.status(500).json({ message: error.message });
+//     }
+//   };
 
   
 // Update Doctor Profile
-export const updateDoctorProfile = async (req, res) => {
-    const {
-      fullName,
-      phoneNumber,
-      specialization,
-      experience,
-      qualifications,
-      clinicDetails,
-      documents,
-    } = req.body;
+// export const updateDoctorProfile = async (req, res) => {
+//     const {
+//       fullName,
+//       phoneNumber,
+//       specialization,
+//       experience,
+//       qualifications,
+//       clinicDetails,
+//       documents,
+//     } = req.body;
   
-    try {
-      const doctor = await User.findById(req.userId);
-      if (!doctor || doctor.role !== 'doctor') {
-        return res.status(404).json({ message: 'Doctor not found' });
-      }
+//     try {
+//       const doctor = await User.findById(req.userId);
+//       if (!doctor || doctor.role !== 'doctor') {
+//         return res.status(404).json({ message: 'Doctor not found' });
+//       }
   
-      // Update only the provided fields
-      doctor.fullName = fullName || doctor.fullName;
-      doctor.phoneNumber = phoneNumber || doctor.phoneNumber;
-      doctor.specialization = specialization || doctor.specialization;
-      doctor.experience = experience || doctor.experience;
-      doctor.qualifications = qualifications || doctor.qualifications;
-      doctor.clinicDetails = clinicDetails || doctor.clinicDetails;
-      doctor.documents = documents || doctor.documents;
+//       // Update only the provided fields
+//       doctor.fullName = fullName || doctor.fullName;
+//       doctor.phoneNumber = phoneNumber || doctor.phoneNumber;
+//       doctor.specialization = specialization || doctor.specialization;
+//       doctor.experience = experience || doctor.experience;
+//       doctor.qualifications = qualifications || doctor.qualifications;
+//       doctor.clinicDetails = clinicDetails || doctor.clinicDetails;
+//       doctor.documents = documents || doctor.documents;
   
-      const updatedDoctor = await doctor.save();
-      res.json({ message: 'Doctor profile updated successfully', updatedDoctor });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  };
+//       const updatedDoctor = await doctor.save();
+//       res.json({ message: 'Doctor profile updated successfully', updatedDoctor });
+//     } catch (error) {
+//       res.status(500).json({ message: error.message });
+//     }
+//   };

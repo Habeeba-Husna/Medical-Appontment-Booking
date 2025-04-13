@@ -4,8 +4,6 @@ import Patient from '../models/patientModel.js';
 import { handleError } from '../utils/errorHandler.js';
 import { sendNotification } from '../config/emailConfig.js';
 
-
-
 export const createAppointment = async (req, res) => {
     try {
       const { doctorId, date: newDate, time: newTime, status } = req.body;
@@ -44,73 +42,6 @@ console.log("time:", newTime);
   };
   
 
-  // export const createAppointment = async (req, res) => {
-  //   try {
-  //     const { doctorId, date, time, status } = req.body;  // Removed the aliases
-  //     // const patientId = req.user._id;                        // Direct fetch frm authntictd user
-  //     console.log("req.patient:", req.patient);
-  //     console.log("doctorId:", doctorId);
-  //     console.log("date:", date);
-  //     console.log("time:", time);
-       
-  //     const patientId = req.patient._id;
-
-  //     if (!doctorId || !date || !time) {
-  //       return res.status(400).json({ message: 'DoctorId, date, and time are required' });
-  //     }
-  
-  //     const doctor = await Doctor.findById(doctorId);
-      
-  //     if (!doctor) {
-  //       return res.status(404).json({ message: 'Doctor not found' });
-  //     }
-  
-  //     const newAppointment = new Appointment({
-  //       doctorId,
-  //       patientId,
-  //       date,
-  //       time,
-  //       status: status || 'Pending',
-  //     });
-  
-  //     await newAppointment.save();
-  //     res.status(201).json({ message: 'Appointment created successfully', appointment: newAppointment });
-  //   } catch (error) {
-  //     res.status(500).json({ message: error.message });
-  //   }
-  // };
-
-//  All Appointments with Filters
-
-// export const getAllAppointments = async (req, res) => {
-//     try {
-//       const { page = 1, limit = 10, status, doctorId, patientId } = req.query;
-//       const filter = {};
-  
-//       if (status) filter.status = status;
-//       if (doctorId) filter.doctorId = doctorId;
-//       if (patientId) filter.patientId = patientId;
-  
-//       const appointments = await Appointment.find(filter)
-//         .populate('doctorId', 'fullName specialization')
-//         .populate('patientId', 'fullName')
-//         .limit(limit * 1)
-//         .skip((page - 1) * limit);
-  
-//       const total = await Appointment.countDocuments(filter);
-  
-//       res.status(200).json({
-//         message: 'Appointments fetched successfully',
-//         appointments,
-//         total,
-//         page,
-//         totalPages: Math.ceil(total / limit),
-//       });
-//     } catch (error) {
-//       res.status(500).json({ message: error.message });
-//     }
-//   };
-  
 export const getAllAppointments = async (req, res) => {
   console.log("xcvbnm   ...........")
   try {

@@ -17,10 +17,10 @@
 
 
 import express from 'express';
-import {
-  getDoctorProfile,
-  updateDoctorProfile
-} from '../controllers/doctorController.js';
+// import {
+//   getDoctorProfile,
+//   updateDoctorProfile
+// } from '../controllers/doctorController.js';
 
 import {
   // verifyToken,
@@ -31,7 +31,13 @@ const router = express.Router();
 
 // router.use(verifyToken, authenticateDoctor); //  Apply to all routes
 
-router.get('/profile', getDoctorProfile);
-router.put('/profile', updateDoctorProfile);
+// router.get('/profile', getDoctorProfile);
+// router.put('/profile', updateDoctorProfile);
+
+router.get("/profile", getCurrentDoctorProfile);
+
+// Then dynamic one
+router.get("/:id", getDoctorProfileById);
+
 
 export default router;

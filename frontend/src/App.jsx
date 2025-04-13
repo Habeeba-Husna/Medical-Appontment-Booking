@@ -100,19 +100,18 @@ import {Toaster } from "sonner";
 import store  from './redux/store';
 // import ToastContainer from "./components/ui/ToastContainer";
 
-
 import HomePage from "./pagess/HomePage";
 import PatientRegistration from './pages/PatientRegistration';
 import DoctorRegistration from './pages/DoctorRegistration';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
+import VerifyOTP from './pages/VerifyOTP';
 import ResetPassword from './pages/ResetPassword';
 import RegistrationSelection from './pages/RegistrationSelection';
 
 import DashboardPage from "./pagess/DashboardPage";
 import DoctorsPage from "./pagess/DoctorsPage";
 import AppointmentsPage from "./pagess/AppointmentsPage";
-// import UIComponentsPage from "./pagess/UIComponentsPage";
 import BookAppointmentPage from "./pagess/BookAppointmentsPage";
 import ProfilePage from "./pagess/ProfilePage";
 import MainLayout from "./components/layout/MainLayout";
@@ -121,8 +120,11 @@ import DoctorDetailsPage from "./pagess/DoctorDetailsPage";
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 
-// import ProtectedRoute from './routes/ProtectedRoute';
-import DoctorDashboardPage from "./pagess/DoctorDashboardPage";
+import ProtectedRoute from './routes/ProtectedRoute';
+
+// import DoctorDashboardPage from "./pagess/DoctorDashboardPage";
+
+
 // import AdminDashboard from './pages/AdminDashboard';
 
 
@@ -142,8 +144,6 @@ const App = () => (
         <BrowserRouter>
        
           <Routes>
-            {/* Public Routes */}
-            {/* <Route path="/" element={<HomePage />} /> */}
 
             <Route path="/" element={<HomePage />} />
 
@@ -153,6 +153,7 @@ const App = () => (
         <Route path="/register-doctor" element={<DoctorRegistration />} />
 
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-otp" element={<VerifyOTP />} />
           <Route path="/reset-password" element={<ResetPassword />} />
             
             {/* Protected Routes - Wrapped in MainLayout */}
@@ -163,7 +164,7 @@ const App = () => (
               <Route path="/book-appointment/:doctorId" element={<BookAppointmentPage />} />
               <Route path="/appointments" element={<AppointmentsPage />} />
               <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/dashboard2" element={<DoctorDashboardPage />} />
+              {/* <Route path="/dashboard2" element={<DoctorDashboardPage />} /> */}
               
             </Route>
 

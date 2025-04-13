@@ -87,7 +87,7 @@ const Hero = () => {
           <div className="flex flex-col sm:flex-row gap-3 mt-6 justify-center md:justify-start">
             <button 
               className="bg-blue-600 text-white px-6 py-2 text-sm rounded-lg"
-              onClick={() => navigate('/register-selection')}
+              onClick={() => navigate('/login')}
             >
               Get Started
             </button>

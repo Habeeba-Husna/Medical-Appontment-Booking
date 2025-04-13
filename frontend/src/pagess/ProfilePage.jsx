@@ -1,715 +1,370 @@
-
-// import React, { useState } from 'react';
-// import {Button } from '../components/ui/Button';
-// import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
-// import {Input} from '../components/ui/Input';
-// import {Textarea} from '../components/ui/Textarea';
-// import { Label } from '../components/ui/label';
-// import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/Avatar';
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-// import { useAppSelector } from '../hooks/useAppSelector';
-// import { useToast } from '../hooks/use-toast';
-
-// const ProfilePage = () => {
-//   const { name, email } = useAppSelector(state => state.auth);
-//   const { toast } = useToast();
-
-//   const [profileData, setProfileData] = useState({
-//     fullName: name || '',
-//     email: email || '',
-//     phone: '(123) 456-7890',
-//     age: '35',
-//     gender: 'Male',
-//     address: '123 Main St, New York, NY 10001',
-//     bloodGroup: 'O+',
-//     emergencyContact: 'Jane Doe - (123) 456-7899',
-//   });
-  
-//   const [passwordData, setPasswordData] = useState({
-//     currentPassword: '',
-//     newPassword: '',
-//     confirmPassword: '',
-//   });
-  
-//   const [medicalHistory, setMedicalHistory] = useState({
-//     allergies: 'Peanuts, Penicillin',
-//     chronicConditions: 'Asthma',
-//     currentMedications: 'Albuterol inhaler',
-//     pastSurgeries: 'Appendectomy (2015)',
-//     familyHistory: 'Diabetes (mother), Hypertension (father)',
-//   });
-  
-//   const handleProfileChange = (e) => {
-//     const { name, value } = e.target;
-//     setProfileData(prev => ({ ...prev, [name]: value }));
-//   };
-  
-//   const handlePasswordChange = (e) => {
-//     const { name, value } = e.target;
-//     setPasswordData(prev => ({ ...prev, [name]: value }));
-//   };
-  
-//   const handleMedicalHistoryChange = (e) => {
-//     const { name, value } = e.target;
-//     setMedicalHistory(prev => ({ ...prev, [name]: value }));
-//   };
-  
-//   const handleProfileSubmit = (e) => {
-//     e.preventDefault();
-//     toast({
-//       title: "Profile Updated",
-//       description: "Your profile information has been updated successfully.",
-//     });
-//   };
-  
-//   const handlePasswordSubmit = (e) => {
-//     e.preventDefault();
-    
-//     if (passwordData.newPassword !== passwordData.confirmPassword) {
-//       toast({
-//         title: "Error",
-//         description: "New passwords do not match.",
-//         variant: "destructive",
-//       });
-//       return;
-//     }
-    
-//     toast({
-//       title: "Password Updated",
-//       description: "Your password has been changed successfully.",
-//     });
-    
-//     setPasswordData({
-//       currentPassword: '',
-//       newPassword: '',
-//       confirmPassword: '',
-//     });
-//   };
-  
-//   const handleMedicalHistorySubmit = (e) => {
-//     e.preventDefault();
-//     toast({
-//       title: "Medical History Updated",
-//       description: "Your medical history has been updated successfully.",
-//     });
-//   };
-  
-//   const getInitials = (name) => {
-//     if (!name) return 'U';
-//     return name
-//       .split(' ')
-//       .map(part => part[0])
-//       .join('')
-//       .toUpperCase();
-//   };
-
-//   return (
-//     <div>
-//       <h1 className="text-2xl font-bold mb-6">My Profile</h1>
-      
-//       <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6">
-//         <div className="space-y-6">
-//           <Card>
-//             <CardContent className="p-6 flex flex-col items-center">
-//               <Avatar className="h-24 w-24 mb-4">
-//                 <AvatarImage src="" alt={name || 'User'} />
-//                 <AvatarFallback className="bg-medical-primary text-white text-xl">
-//                   {getInitials(name)}
-//                 </AvatarFallback>
-//               </Avatar>
-//               <h2 className="text-xl font-semibold mb-1">{name}</h2>
-//               <p className="text-gray-500 mb-4">{email}</p>
-//               <Button 
-//                 variant="outline" 
-//                 className="w-full text-medical-secondary border-medical-secondary"
-//               >
-//                 Change Photo
-//               </Button>
-//             </CardContent>
-//           </Card>
-          
-//           <Card>
-//             <CardHeader>
-//               <CardTitle>Account Verification</CardTitle>
-//             </CardHeader>
-//             <CardContent>
-//               <div className="space-y-2">
-//                 <div className="flex items-center justify-between">
-//                   <span>Email</span>
-//                   <span className="text-sm text-green-600 font-medium">Verified</span>
-//                 </div>
-//                 <div className="flex items-center justify-between">
-//                   <span>Phone Number</span>
-//                   <span className="text-sm text-green-600 font-medium">Verified</span>
-//                 </div>
-//                 <div className="flex items-center justify-between">
-//                   <span>Identity</span>
-//                   <span className="text-sm text-yellow-600 font-medium">Pending</span>
-//                 </div>
-//               </div>
-//             </CardContent>
-//           </Card>
-//         </div>
-        
-//         <div>
-//           <Tabs defaultValue="personal" className="w-full">
-//             <TabsList className="mb-6">
-//               <TabsTrigger value="personal">Personal Information</TabsTrigger>
-//               <TabsTrigger value="medical">Medical History</TabsTrigger>
-//               <TabsTrigger value="security">Security Settings</TabsTrigger>
-//             </TabsList>
-            
-//             <TabsContent value="personal">
-//               <Card>
-//                 <CardHeader>
-//                   <CardTitle>Personal Information</CardTitle>
-//                 </CardHeader>
-//                 <CardContent>
-//                   <form onSubmit={handleProfileSubmit} className="space-y-4">
-//                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//                       <div className="space-y-2">
-//                         <Label htmlFor="fullName">Full Name</Label>
-//                         <Input 
-//                           id="fullName"
-//                           name="fullName"
-//                           value={profileData.fullName}
-//                           onChange={handleProfileChange}
-//                         />
-//                       </div>
-                      
-//                       <div className="space-y-2">
-//                         <Label htmlFor="email">Email</Label>
-//                         <Input 
-//                           id="email"
-//                           name="email"
-//                           type="email"
-//                           value={profileData.email}
-//                           onChange={handleProfileChange}
-//                           disabled
-//                         />
-//                       </div>
-                      
-//                       <div className="space-y-2">
-//                         <Label htmlFor="phone">Phone Number</Label>
-//                         <Input 
-//                           id="phone"
-//                           name="phone"
-//                           value={profileData.phone}
-//                           onChange={handleProfileChange}
-//                         />
-//                       </div>
-                      
-//                       <div className="space-y-2">
-//                         <Label htmlFor="age">Age</Label>
-//                         <Input 
-//                           id="age"
-//                           name="age"
-//                           value={profileData.age}
-//                           onChange={handleProfileChange}
-//                         />
-//                       </div>
-                      
-//                       <div className="space-y-2">
-//                         <Label htmlFor="gender">Gender</Label>
-//                         <Input 
-//                           id="gender"
-//                           name="gender"
-//                           value={profileData.gender}
-//                           onChange={handleProfileChange}
-//                         />
-//                       </div>
-                      
-//                       <div className="space-y-2">
-//                         <Label htmlFor="bloodGroup">Blood Group</Label>
-//                         <Input 
-//                           id="bloodGroup"
-//                           name="bloodGroup"
-//                           value={profileData.bloodGroup}
-//                           onChange={handleProfileChange}
-//                         />
-//                       </div>
-                      
-//                       <div className="space-y-2 md:col-span-2">
-//                         <Label htmlFor="address">Address</Label>
-//                         <Input 
-//                           id="address"
-//                           name="address"
-//                           value={profileData.address}
-//                           onChange={handleProfileChange}
-//                         />
-//                       </div>
-                      
-//                       <div className="space-y-2 md:col-span-2">
-//                         <Label htmlFor="emergencyContact">Emergency Contact</Label>
-//                         <Input 
-//                           id="emergencyContact"
-//                           name="emergencyContact"
-//                           value={profileData.emergencyContact}
-//                           onChange={handleProfileChange}
-//                         />
-//                       </div>
-//                     </div>
-                    
-//                     <Button 
-//                       type="submit"
-//                       className="bg-medical-primary hover:bg-medical-secondary"
-//                     >
-//                       Save Changes
-//                     </Button>
-//                   </form>
-//                 </CardContent>
-//               </Card>
-//             </TabsContent>
-            
-//             <TabsContent value="medical">
-//               <Card>
-//                 <CardHeader>
-//                   <CardTitle>Medical History</CardTitle>
-//                 </CardHeader>
-//                 <CardContent>
-//                   <form onSubmit={handleMedicalHistorySubmit} className="space-y-4">
-//                     <div className="space-y-4">
-//                       <div className="space-y-2">
-//                         <Label htmlFor="allergies">Allergies</Label>
-//                         <Textarea 
-//                           id="allergies"
-//                           name="allergies"
-//                           value={medicalHistory.allergies}
-//                           onChange={handleMedicalHistoryChange}
-//                           placeholder="List any allergies you have"
-//                         />
-//                       </div>
-                      
-//                       <div className="space-y-2">
-//                         <Label htmlFor="chronicConditions">Chronic Conditions</Label>
-//                         <Textarea 
-//                           id="chronicConditions"
-//                           name="chronicConditions"
-//                           value={medicalHistory.chronicConditions}
-//                           onChange={handleMedicalHistoryChange}
-//                           placeholder="List any chronic conditions"
-//                         />
-//                       </div>
-                      
-//                       <div className="space-y-2">
-//                         <Label htmlFor="currentMedications">Current Medications</Label>
-//                         <Textarea 
-//                           id="currentMedications"
-//                           name="currentMedications"
-//                           value={medicalHistory.currentMedications}
-//                           onChange={handleMedicalHistoryChange}
-//                           placeholder="List medications you're currently taking"
-//                         />
-//                       </div>
-                      
-//                       <div className="space-y-2">
-//                         <Label htmlFor="pastSurgeries">Past Surgeries</Label>
-//                         <Textarea 
-//                           id="pastSurgeries"
-//                           name="pastSurgeries"
-//                           value={medicalHistory.pastSurgeries}
-//                           onChange={handleMedicalHistoryChange}
-//                           placeholder="List any past surgeries with dates"
-//                         />
-//                       </div>
-                      
-//                       <div className="space-y-2">
-//                         <Label htmlFor="familyHistory">Family Medical History</Label>
-//                         <Textarea 
-//                           id="familyHistory"
-//                           name="familyHistory"
-//                           value={medicalHistory.familyHistory}
-//                           onChange={handleMedicalHistoryChange}
-//                           placeholder="Any relevant family medical history"
-//                         />
-//                       </div>
-//                     </div>
-                    
-//                     <Button 
-//                       type="submit"
-//                       className="bg-medical-primary hover:bg-medical-secondary"
-//                     >
-//                       Save Medical History
-//                     </Button>
-//                   </form>
-//                 </CardContent>
-//               </Card>
-//             </TabsContent>
-            
-//             <TabsContent value="security">
-//               <Card>
-//                 <CardHeader>
-//                   <CardTitle>Change Password</CardTitle>
-//                 </CardHeader>
-//                 <CardContent>
-//                   <form onSubmit={handlePasswordSubmit} className="space-y-4">
-//                     <div className="space-y-4">
-//                       <div className="space-y-2">
-//                         <Label htmlFor="currentPassword">Current Password</Label>
-//                         <Input 
-//                           id="currentPassword"
-//                           name="currentPassword"
-//                           type="password"
-//                           value={passwordData.currentPassword}
-//                           onChange={handlePasswordChange}
-//                           required
-//                         />
-//                       </div>
-                      
-//                       <div className="space-y-2">
-//                         <Label htmlFor="newPassword">New Password</Label>
-//                         <Input 
-//                           id="newPassword"
-//                           name="newPassword"
-//                           type="password"
-//                           value={passwordData.newPassword}
-//                           onChange={handlePasswordChange}
-//                           required
-//                         />
-//                       </div>
-                      
-//                       <div className="space-y-2">
-//                         <Label htmlFor="confirmPassword">Confirm New Password</Label>
-//                         <Input 
-//                           id="confirmPassword"
-//                           name="confirmPassword"
-//                           type="password"
-//                           value={passwordData.confirmPassword}
-//                           onChange={handlePasswordChange}
-//                           required
-//                         />
-//                       </div>
-//                     </div>
-                    
-//                     <Button 
-//                       type="submit"
-//                       className="bg-medical-primary hover:bg-medical-secondary"
-//                     >
-//                       Change Password
-//                     </Button>
-//                   </form>
-//                 </CardContent>
-//               </Card>
-//             </TabsContent>
-//           </Tabs>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default ProfilePage;
-
-
-
-import React, { useState } from 'react';
-import { Button } from '../components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
-import { Textarea } from '../components/ui/Textarea';
-import { Label } from '../components/ui/label';
-import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/Avatar';
+import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { useAppSelector } from '../hooks/useAppSelector';
-import { useToast } from '../hooks/use-toast';
+import { Card, CardContent, CardHeader } from '../components/ui/Card';
+import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/Avatar';
+import { Camera, Pencil, Check, X } from "lucide-react";
+import { Button } from '../components/ui/Button';
+import { Badge } from '../components/ui/Badge';
+import InputField from '../components/ui/InputField';
+import SelectField from '../components/ui/SelectField';
+import TextAreaField from '../components/ui/TextAreaField';
+import axiosInstance from "../api/axiosInstance";
+import { useToast } from '../hooks/use-toast'; 
 
-const ProfilePage = () => {
-  const { name, email } = useAppSelector((state) => state.auth);
+const ProfilePage  = ({ profile }) => {
+  const [user, setUser] = useState(null);
+  const [tempPhoto, setTempPhoto] = useState(null);
   const { toast } = useToast();
-
-  const [profileData, setProfileData] = useState({
-    fullName: name || '',
-    email: email || '',
-    phone: '(123) 456-7890',
-    age: '35',
-    gender: 'Male',
-    address: '123 Main St, New York, NY 10001',
-    bloodGroup: 'O+',
-    emergencyContact: 'Jane Doe - (123) 456-7899',
+  const [activeTab, setActiveTab] = useState("personal");
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: profile?.fullName || "",
+    email: profile?.email || "",
+    phoneNumber: profile?.phoneNumber || "",
+    age: profile?.age || "",
+    gender: profile?.gender || "",
+    bloodGroup: profile?.bloodGroup || "",
+    allergies: profile?.allergies || "",
+    chronicConditions: profile?.chronicConditions || "",
+    currentMedications: profile?.currentMedications || "",
+    pastSurgeries: profile?.pastSurgeries || ""
   });
 
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-  });
-
-  const [medicalHistory, setMedicalHistory] = useState({
-    allergies: 'Peanuts, Penicillin',
-    chronicConditions: 'Asthma',
-    currentMedications: 'Albuterol inhaler',
-    pastSurgeries: 'Appendectomy (2015)',
-    familyHistory: 'Diabetes (mother), Hypertension (father)',
-  });
-
-  const handleProfileChange = (e) => {
-    const { name, value } = e.target;
-    setProfileData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleMedicalHistoryChange = (e) => {
-    const { name, value } = e.target;
-    setMedicalHistory((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleProfileSubmit = (e) => {
-    e.preventDefault();
-    toast({
-      title: 'Profile Updated',
-      description: 'Your profile information has been updated successfully.',
-    });
-  };
-
-  const handlePasswordSubmit = (e) => {
-    e.preventDefault();
-
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast({
-        title: 'Error',
-        description: 'New passwords do not match.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    toast({
-      title: 'Password Updated',
-      description: 'Your password has been changed successfully.',
-    });
-
-    setPasswordData({
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-    });
-  };
-
-  const handleMedicalHistorySubmit = (e) => {
-    e.preventDefault();
-    toast({
-      title: 'Medical History Updated',
-      description: 'Your medical history has been updated successfully.',
-    });
-  };
-
-  const getInitials = (name) => {
-    if (!name) return 'U';
-    return name
-      .split(' ')
-      .map((part) => part[0])
-      .join('')
-      .toUpperCase();
-  };
+    // Function to fetch updated profile
+    const fetchUpdatedProfile = async () => {
+      try {
+        const response = await axiosInstance.get('/patient/profile', { withCredentials: true });
+        setUser(response.data);  // Update profile state with new data
+      } catch (error) {
+        console.error('Failed to fetch updated profile', error);
+      }
+    };
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    const formData = new FormData();
-    formData.append('profilePhoto', file);
-
-    try {
-      const res = await fetch('/api/patients/upload-profile-photo', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        toast({
-          title: 'Profile photo updated!',
-          description: 'Your new profile picture has been uploaded.',
-        });
-      } else {
-        toast({
-          title: 'Upload failed',
-          description: data.message || 'Something went wrong.',
-          variant: 'destructive',
-        });
-      }
-    } catch (err) {
+  
+    // Validate file
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
       toast({
-        title: 'Error',
-        description: err.message || 'Unable to upload profile photo.',
+        title: 'Invalid file type',
+        description: 'Please upload a JPEG, PNG, or WEBP image',
         variant: 'destructive',
       });
+      return;
     }
+  
+    const formData = new FormData();
+    formData.append('profilePhoto', file);
+  
+    try {
+      // Show temporary preview
+      setTempPhoto(URL.createObjectURL(file));
+  
+      const response = await axiosInstance.post(
+        '/patient/upload-profile-photo',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          withCredentials: true,
+        }
+      );
+  
+      // Update profile data
+      // await fetchUpdatedProfile();
+      
+     // Update local state directly from response if possible
+    if (response.data.profilePhoto) {
+      setUser(prev => ({...prev, profilePhoto: response.data.profilePhoto}));
+    }
+    
+    toast({
+      title: 'Success!',
+      description: 'Profile photo updated successfully',
+    });
+  } catch (error) {
+    console.error('Upload failed:', error);
+    toast({
+      title: 'Upload failed',
+      description: error.response?.data?.message || 'Failed to upload photo',
+      variant: 'destructive',
+    });
+  } finally {
+    if (tempPhoto) {
+      URL.revokeObjectURL(tempPhoto);
+      setTempPhoto(null);
+    }
+  }
+};
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleSave = () => {
+    console.log("Saving data:", formData);
+    // Implement save logic here
+    setIsEditing(false);
+  };
+
+  const getInitials = (name = "") => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
+
+  const verificationStatus = [
+    { label: "Email", verified: profile?.emailVerified, icon: profile?.emailVerified ? <Check className="h-4 w-4 mr-1" /> : <X className="h-4 w-4 mr-1" /> },
+    { label: "Phone", verified: profile?.phoneVerified, icon: profile?.phoneVerified ? <Check className="h-4 w-4 mr-1" /> : <X className="h-4 w-4 mr-1" /> },
+    { label: "Identity", verified: profile?.identityVerified, icon: profile?.identityVerified ? <Check className="h-4 w-4 mr-1" /> : <X className="h-4 w-4 mr-1" /> }
+  ];
+
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">My Profile</h1>
+    <div className="container mx-auto py-8 px-4">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+          My Profile
+        </h1>
+        {isEditing ? (
+          <div className="flex space-x-2">
+            <Button variant="outline" onClick={() => setIsEditing(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
+              Save Changes
+            </Button>
+          </div>
+        ) : (
+          <Button 
+            onClick={() => setIsEditing(true)} 
+            className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700"
+          >
+            <Pencil className="h-4 w-4" /> Edit Profile
+          </Button>
+        )}
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8">
+        {/* Left Sidebar */}
         <div className="space-y-6">
-          <Card>
-            <CardContent className="p-6 flex flex-col items-center">
-              <Avatar className="h-24 w-24 mb-4">
-                <AvatarImage src={profileData?.profilePhoto || ''} alt={name || 'User'} />
-                <AvatarFallback className="bg-medical-primary text-white text-xl">
-                  {getInitials(name)}
-                </AvatarFallback>
-              </Avatar>
-              <h2 className="text-xl font-semibold mb-1">{name}</h2>
-              <p className="text-gray-500 mb-4">{email}</p>
-
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                style={{ display: 'none' }}
-                id="profilePhotoInput"
-              />
-
-              <Button
-                variant="outline"
-                className="w-full text-medical-secondary border-medical-secondary"
-                onClick={() => document.getElementById('profilePhotoInput').click()}
-              >
-                Change Photo
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Verification</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span>Email</span>
-                  <span className="text-sm text-green-600 font-medium">Verified</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Phone Number</span>
-                  <span className="text-sm text-green-600 font-medium">Verified</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Identity</span>
-                  <span className="text-sm text-yellow-600 font-medium">Pending</span>
-                </div>
+          {/* Profile Card */}
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-white">
+            <CardContent className="p-6 flex flex-col items-center text-center">
+              <div className="relative mb-4 group">
+              <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
+    {tempPhoto ? (
+      <AvatarImage src={tempPhoto} alt="Uploading..." className="object-cover" />
+    ) : (
+      <>
+        <AvatarImage
+          src={profile?.profilePhoto}
+          alt={profile?.fullName}
+          className="object-cover"
+        />
+        <AvatarFallback className="bg-blue-600 text-white text-3xl font-medium">
+          {getInitials(profile?.fullName)}
+        </AvatarFallback>
+      </>
+    )}
+  </Avatar>
+                <label
+                  htmlFor="profilePhotoInput"
+                  className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700 transition-all duration-200 shadow-md"
+                >
+                  <Camera className="h-5 w-5" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                    id="profilePhotoInput"
+                  />
+                </label>
               </div>
+
+              <h2 className="text-xl font-semibold mb-1 text-gray-800">
+                {profile?.fullName || "Patient"}
+              </h2>
+              <p className="text-gray-600 mb-4">{profile?.email}</p>
+
+              <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                <div
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full"
+                  style={{ width: `${profile?.isVerified ? 100 : 30}%` }}
+                ></div>
+              </div>
+
+              <Badge variant={profile?.isVerified ? "success" : "warning"} className="px-3 py-1">
+                {profile?.isVerified ? "Verified Account" : "Profile 30% Complete"}
+              </Badge>
             </CardContent>
           </Card>
+
+          {/* upcoming appointment */}
+          <Card className="border-0 shadow-sm">
+  <CardHeader className="border-b pb-4">
+    <h3 className="text-lg font-semibold">Upcoming Appointments</h3>
+  </CardHeader>
+  <CardContent className="p-6 space-y-3">
+    {profile?.appointments?.length > 0 ? (
+      profile.appointments.map((appt, index) => (
+        <div key={index} className="text-sm text-gray-700">
+          <strong>{appt.doctorName}</strong><br />
+          {appt.date} at {appt.time}
+        </div>
+      ))
+    ) : (
+      <p className="text-gray-500">No upcoming appointments.</p>
+    )}
+    <Button variant="outline" className="w-full mt-4 border-blue-600 text-blue-600 hover:bg-blue-50">
+      Book New Appointment
+    </Button>
+  </CardContent>
+</Card>
         </div>
 
+        {/* Right Tabs Content */}
         <div>
-          <Tabs defaultValue="personal" className="w-full">
-            <TabsList className="mb-6">
-              <TabsTrigger value="personal">Personal Information</TabsTrigger>
-              <TabsTrigger value="medical">Medical History</TabsTrigger>
-              <TabsTrigger value="security">Security Settings</TabsTrigger>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-6 bg-gray-100 p-1 rounded-lg">
+              <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                Personal Info
+              </TabsTrigger>
+              <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                Medical History
+              </TabsTrigger>
+              <TabsTrigger value="security" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                Security
+              </TabsTrigger>
             </TabsList>
 
+            {/* PERSONAL INFO */}
             <TabsContent value="personal">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Personal Information</CardTitle>
+              <Card className="border-0 shadow-sm">
+                <CardHeader className="border-b pb-4">
+                  <h3 className="text-xl font-semibold text-gray-800">Personal Information</h3>
                 </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleProfileSubmit} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {[
-                        { label: 'Full Name', id: 'fullName' },
-                        { label: 'Email', id: 'email', disabled: true, type: 'email' },
-                        { label: 'Phone Number', id: 'phone' },
-                        { label: 'Age', id: 'age' },
-                        { label: 'Gender', id: 'gender' },
-                        { label: 'Blood Group', id: 'bloodGroup' },
-                        { label: 'Address', id: 'address', span: true },
-                        { label: 'Emergency Contact', id: 'emergencyContact', span: true },
-                      ].map(({ label, id, disabled, type, span }) => (
-                        <div key={id} className={`space-y-2 ${span ? 'md:col-span-2' : ''}`}>
-                          <Label htmlFor={id}>{label}</Label>
-                          <Input
-                            id={id}
-                            name={id}
-                            type={type || 'text'}
-                            value={profileData[id]}
-                            onChange={handleProfileChange}
-                            disabled={disabled}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    <Button type="submit" className="bg-medical-primary hover:bg-medical-secondary">
-                      Save Changes
-                    </Button>
-                  </form>
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <InputField 
+                      label="Full Name" 
+                      name="fullName"
+                      value={formData.fullName} 
+                      onChange={handleInputChange}
+                      editable={isEditing}
+                    />
+                    <InputField 
+                      label="Email" 
+                      name="email"
+                      value={formData.email} 
+                      onChange={handleInputChange}
+                      editable={false}
+                    />
+                    <InputField 
+                      label="Phone Number" 
+                      name="phoneNumber"
+                      value={formData.phoneNumber} 
+                      onChange={handleInputChange}
+                      editable={isEditing}
+                    />
+                    <InputField 
+                      label="Age" 
+                      name="age"
+                      value={formData.age} 
+                      onChange={handleInputChange}
+                      editable={isEditing}
+                    />
+                    <SelectField 
+                      label="Gender" 
+                      name="gender"
+                      value={formData.gender} 
+                      onChange={handleInputChange}
+                      options={["Male", "Female", "Other"]}
+                      editable={isEditing}
+                    />
+                    <SelectField 
+                      label="Blood Group" 
+                      name="bloodGroup"
+                      value={formData.bloodGroup} 
+                      onChange={handleInputChange}
+                      options={["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]}
+                      editable={isEditing}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
+            {/* MEDICAL HISTORY */}
             <TabsContent value="medical">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Medical History</CardTitle>
+              <Card className="border-0 shadow-sm">
+                <CardHeader className="border-b pb-4">
+                  <h3 className="text-xl font-semibold text-gray-800">Medical History</h3>
                 </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleMedicalHistorySubmit} className="space-y-4">
-                    {[
-                      { id: 'allergies', label: 'Allergies' },
-                      { id: 'chronicConditions', label: 'Chronic Conditions' },
-                      { id: 'currentMedications', label: 'Current Medications' },
-                      { id: 'pastSurgeries', label: 'Past Surgeries' },
-                      { id: 'familyHistory', label: 'Family History' },
-                    ].map(({ id, label }) => (
-                      <div className="space-y-2" key={id}>
-                        <Label htmlFor={id}>{label}</Label>
-                        <Textarea
-                          id={id}
-                          name={id}
-                          value={medicalHistory[id]}
-                          onChange={handleMedicalHistoryChange}
-                          placeholder={`Enter your ${label.toLowerCase()}`}
-                        />
-                      </div>
-                    ))}
-                    <Button type="submit" className="bg-medical-primary hover:bg-medical-secondary">
-                      Save Medical History
-                    </Button>
-                  </form>
+                <CardContent className="p-6 space-y-6">
+                  <TextAreaField 
+                    label="Allergies" 
+                    name="allergies"
+                    value={formData.allergies} 
+                    onChange={handleInputChange}
+                    editable={isEditing}
+                  />
+                  <TextAreaField 
+                    label="Chronic Conditions" 
+                    name="chronicConditions"
+                    value={formData.chronicConditions} 
+                    onChange={handleInputChange}
+                    editable={isEditing}
+                  />
+                  <TextAreaField 
+                    label="Current Medications" 
+                    name="currentMedications"
+                    value={formData.currentMedications} 
+                    onChange={handleInputChange}
+                    editable={isEditing}
+                  />
+                  <TextAreaField 
+                    label="Past Surgeries" 
+                    name="pastSurgeries"
+                    value={formData.pastSurgeries} 
+                    onChange={handleInputChange}
+                    editable={isEditing}
+                  />
                 </CardContent>
               </Card>
             </TabsContent>
 
+            {/* SECURITY */}
             <TabsContent value="security">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Change Password</CardTitle>
+              <Card className="border-0 shadow-sm">
+                <CardHeader className="border-b pb-4">
+                  <h3 className="text-xl font-semibold text-gray-800">Security Settings</h3>
                 </CardHeader>
-                <CardContent>
-                  <form onSubmit={handlePasswordSubmit} className="space-y-4">
-                    {[
-                      { id: 'currentPassword', label: 'Current Password' },
-                      { id: 'newPassword', label: 'New Password' },
-                      { id: 'confirmPassword', label: 'Confirm Password' },
-                    ].map(({ id, label }) => (
-                      <div className="space-y-2" key={id}>
-                        <Label htmlFor={id}>{label}</Label>
-                        <Input
-                          id={id}
-                          name={id}
-                          type="password"
-                          value={passwordData[id]}
-                          onChange={handlePasswordChange}
-                        />
-                      </div>
-                    ))}
-                    <Button type="submit" className="bg-medical-primary hover:bg-medical-secondary">
-                      Update Password
-                    </Button>
-                  </form>
+                <CardContent className="p-6 space-y-4">
+                  <InputField 
+                    label="Current Password" 
+                    type="password" 
+                    editable={true}
+                  />
+                  <InputField 
+                    label="New Password" 
+                    type="password" 
+                    editable={true}
+                  />
+                  <InputField 
+                    label="Confirm New Password" 
+                    type="password" 
+                    editable={true}
+                  />
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 mt-4">
+                    Update Password
+                  </Button>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -719,5 +374,4 @@ const ProfilePage = () => {
     </div>
   );
 };
-
-export default ProfilePage;
+export default ProfilePage 
