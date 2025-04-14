@@ -56,12 +56,13 @@ import {
   logoutUser,
   forgotPassword,
   verifyOTP,
-  resetPassword
+  resetPassword,
+  getCurrentUser
 } from '../controllers/authController.js';
+import { authenticate } from '../middleware/authMiddleware.js';
 
 
 import { upload } from '../config/cloudinaryConfig.js';
-
 const router = express.Router();
 
 
@@ -82,5 +83,6 @@ router.post('/refreshtoken', refreshToken);
 
 // Logout Route
 router.post('/logout', logoutUser);
+router.get('/current-user',authenticate,getCurrentUser)
 
 export default router;

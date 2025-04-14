@@ -9,6 +9,8 @@ import {
   refreshTokenService,
   logoutUserService,
 } from '../service/authService.js';
+import getUserById from '../utils/getUserById.js';
+import { ApiError } from '../utils/errorHandler.js';
 
 //REGISTRATION CONTROLLERS 
 export const registerPatient = asyncHandler(async (req, res) => {
@@ -89,6 +91,34 @@ export const refreshToken = asyncHandler(async (req, res) => {
     accessToken,
   });
 });
+
+
+export const getCurrentUser = asyncHandler(async (req, res) => {
+  const token = req.cookies?.token;
+
+  if (!token) {
+    throw new ApiError(401, 'Not authenticated');
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (err) {
+    throw new ApiError(401, 'Invalid or expired token');
+  }
+
+  const user = await getUserById(decoded.id);
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
 
 // LOGOUT CONTROLLER 
 export const logoutUser = asyncHandler(async (req, res) => {

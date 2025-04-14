@@ -1,6 +1,7 @@
 import Doctor from '../models/doctorModel.js';
 import { handleError } from '../utils/errorHandler.js';
 import asyncHandler from '../utils/asyncHandler.js';
+import { computeNextAvailableSlot } from '../../frontend/src/utils/slotUtils.js';
 
 // Weekday order for slot sorting
 const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -54,13 +55,19 @@ export const getAllDoctors = asyncHandler(async (req, res) => {
       ? `${nextSlot.day}, ${nextSlot.startTime}`
       : 'Not Available';
 
-    // Calculate average rating
-    if (doctorObj.ratings?.length > 0) {
-      const totalRating = doctorObj.ratings.reduce((sum, r) => sum + r.rating, 0);
-      doctorObj.rating = (totalRating / doctorObj.ratings.length).toFixed(1);
-    } else {
-      doctorObj.rating = 'N/A';
-    }
+    // // Calculate average rating
+    // if (doctorObj.ratings?.length > 0) {
+    //   const totalRating = doctorObj.ratings.reduce((sum, r) => sum + r.rating, 0);
+    //   doctorObj.rating = (totalRating / doctorObj.ratings.length).toFixed(1);
+    //   doctorObj.totalRatings = doctorObj.ratings.length;
+    // } else {
+    //   doctorObj.rating = 'N/A';
+    //   doctorObj.totalRatings = 0;
+    // }
+
+    doctorObj.rating = doctorObj.rating || 'N/A';
+doctorObj.totalRatings = doctorObj.totalRatings || 0;
+
 
     return doctorObj;
   });
@@ -77,6 +84,7 @@ export const getAllDoctors = asyncHandler(async (req, res) => {
 export const getDoctorById = asyncHandler(async (req, res) => {
   try {
     const doctor = await Doctor.findById(req.params.id).select('-password');
+    console.log("Received ................:", req.params.id);
 
     if (!doctor || !doctor.isApproved || !doctor.isVerified || !doctor.isProfileComplete) {
       return res.status(404).json({ message: 'Doctor not found or not verified/approved/complete' });
@@ -101,8 +109,10 @@ export const getDoctorById = asyncHandler(async (req, res) => {
     if (doctorObj.ratings?.length > 0) {
       const totalRating = doctorObj.ratings.reduce((sum, r) => sum + r.rating, 0);
       doctorObj.rating = (totalRating / doctorObj.ratings.length).toFixed(1);
+      doctorObj.totalRatings = doctorObj.ratings.length;
     } else {
       doctorObj.rating = 'N/A';
+      doctorObj.totalRatings = 0;
     }
 
     res.status(200).json(doctorObj);
@@ -116,6 +126,7 @@ export const getDoctorById = asyncHandler(async (req, res) => {
 export const getSingleDoctorWithDetails = async (req, res) => {
   try {
     const doctor = await Doctor.findById(req.params.id).select('-password');
+    console.log("Received doctor ID:", req.params.id);
     if (!doctor || !doctor.isApproved || !doctor.isVerified) {
       return res.status(404).json({ message: 'Doctor not found or not verified/approved' });
     }
@@ -155,7 +166,26 @@ export const rateDoctor = async (req, res) => {
     });
 
     await doctor.save();
-    res.status(200).json({ message: 'Rating submitted successfully', updatedDoctor: doctor });
+
+        // Fetch the updated doctor and exclude password
+        const updatedDoctor = await Doctor.findById(req.params.id).select('-password');
+
+    // Calculate average rating
+    const totalRatings = updatedDoctor.ratings.length;
+    const avgRating = totalRatings
+      ? (
+          updatedDoctor.ratings.reduce((sum, r) => sum + r.rating, 0) / totalRatings
+        ).toFixed(1)
+      : 'N/A';
+
+    res.status(200).json({
+      message: 'Rating submitted successfully',
+      updatedDoctor: {
+        ...updatedDoctor.toObject(),
+        rating: avgRating,
+        totalRatings,
+      },
+    });
   } catch (error) {
     console.error('Error in rateDoctor:', error);
     res.status(500).json({ message: 'Server error while rating doctor' });

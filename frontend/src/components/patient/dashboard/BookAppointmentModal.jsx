@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { ENDPOINTS } from "../../api/endPoints";
+import { toast } from "react-toastify";
 
 const BookAppointmentModal = ({ doctor, onClose, onBookingSuccess }) => {
   const [date, setDate] = useState("");
@@ -13,14 +14,25 @@ const BookAppointmentModal = ({ doctor, onClose, onBookingSuccess }) => {
         date,
         time,
       });
-      alert("Appointment booked successfully!");
+      toast.success("Appointment booked successfully!");
       onBookingSuccess();
       onClose();
     } catch (error) {
       console.error("Error booking appointment:", error);
-      alert("Failed to book appointment.");
-    }
-  };
+  //     alert("Failed to book appointment.");
+  //   }
+  // };
+
+  // Check if the error response status is 409 (Conflict)
+  if (error.response && error.response.status === 409) {
+    // Show user-friendly error message if the doctor is not available
+    toast.error("Doctor not available at this time. Please choose another slot.");
+  } else {
+    // Handle any other types of errors
+    toast.error("Failed to book appointment. Please try again.");
+  }
+}
+};
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">

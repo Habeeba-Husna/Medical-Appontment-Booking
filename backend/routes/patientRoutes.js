@@ -230,3 +230,21 @@ router.post('/upload-profile-photo',
 
 
 export default router;
+
+
+
+
+
+// import { authenticate, authorizeRoles } from './middleware/authMiddleware.js';
+
+// app.get('/admin-dashboard', authenticate, authorizeRoles('admin'), (req, res) => {
+//   res.send('Welcome Admin');
+// });
+
+// app.get('/doctor-dashboard', authenticate, authorizeRoles('doctor', 'admin'), (req, res) => {
+//   res.send('Welcome Doctor');
+// });
+
+// app.get('/patient-dashboard', authenticate, authorizeRoles('patient', 'admin'), (req, res) => {
+//   res.send('Welcome Patient');
+// });

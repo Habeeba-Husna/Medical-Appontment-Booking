@@ -193,10 +193,24 @@ export const generateRefreshToken = (user) => {
   );
 };
 
+// export const verifyToken = (token) => {
+//   console.log("verify the token.....")
+//   return jwt.verify(token, process.env.JWT_SECRET);
+// };
+
+
 export const verifyToken = (token) => {
-  console.log("verify the token.....")
-  return jwt.verify(token, process.env.JWT_SECRET);
+  
+  try {
+    console.log("Verifying token...");
+    return jwt.verify(token, process.env.JWT_SECRET);
+  } catch (err) {
+    console.error("Error verifying token:", error);
+    throw new Error('Invalid token');
+  }
 };
+
+
 
 export const verifyRefreshToken = (token) => {
   return jwt.verify(token, process.env.JWT_REFRESH_SECRET);

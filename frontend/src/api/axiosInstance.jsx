@@ -22,105 +22,87 @@ const processQueue = (error, token = null) => {
     });
     failedQueue = [];
 };
+// axiosInstance.interceptors.response.use(
+//   (response) => response,
+//   async (error) => {
+//       const originalRequest = error.config;
+//     console.log("in axis instance..............")
+//     console.log(error.response,"error mdg in access tokren")
+//       // Handle 401 errors for expired tokens
+//       if (error.response && error.response.status === 401){
+//           if (isRefreshing) {
+//               return new Promise((resolve, reject) => {
+//                   failedQueue.push({ resolve, reject });
+//               });
+//           }
+
+//           originalRequest._retry = true;
+//           isRefreshing = true;
+//           console.log("before instance api call")
+//           try {
+//               await axiosInstance.post("/auth/refreshtoken");
+
+//               // Retry the original request after refreshing the token
+//               isRefreshing = false;
+//               return axiosInstance(originalRequest);
+//           } catch (refreshError) {
+//               isRefreshing = false;
+//               processQueue(refreshError, null);
+
+//               // Redirect to login if refresh fails
+//               if (refreshError.response?.status === 401) {
+//                   window.location.href = "/login";
+//               }
+//               return Promise.reject(refreshError);
+//           }
+//       }
+
+//       return Promise.reject(error);
+//   }
+// );
+
 axiosInstance.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+    (response) => response,
+    async (error) => {
       const originalRequest = error.config;
-    console.log("in axis instance..............")
-    console.log(error.response,"error mdg in access tokren")
-      // Handle 401 errors for expired tokens
-      if (error.response && error.response.status === 401){
-          if (isRefreshing) {
-              return new Promise((resolve, reject) => {
-                  failedQueue.push({ resolve, reject });
-              });
-          }
-
-          originalRequest._retry = true;
-          isRefreshing = true;
-          console.log("before instance api call")
-          try {
-              await axiosInstance.post("/auth/refreshtoken");
-
-              // Retry the original request after refreshing the token
-              isRefreshing = false;
-              return axiosInstance(originalRequest);
-          } catch (refreshError) {
-              isRefreshing = false;
-              processQueue(refreshError, null);
-
-              // Redirect to login if refresh fails
-              if (refreshError.response?.status === 401) {
-                  window.location.href = "/login";
-              }
-              return Promise.reject(refreshError);
-          }
+  
+      if (error.response && error.response.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+  
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          });
+        }
+  
+        isRefreshing = true;
+  
+        try {
+          const res = await axiosInstance.post("/auth/refreshtoken");
+          const newAccessToken = res.data.accessToken;
+  
+          // Save new token
+          localStorage.setItem("accessToken", newAccessToken);
+  
+          // Process queued requests
+          processQueue(null, newAccessToken);
+  
+          // Retry the failed request with new token
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          return axiosInstance(originalRequest);
+        } catch (refreshError) {
+          processQueue(refreshError, null);
+          localStorage.removeItem("accessToken"); // Clear token
+          window.location.href = "/login"; // Redirect to login
+          return Promise.reject(refreshError);
+        } finally {
+          isRefreshing = false;
+        }
       }
-
+  
       return Promise.reject(error);
-  }
-);
+    }
+  );
 
 export default axiosInstance;
-
-
-// axiosInstance.interceptors.response.use(
-//     (response) => response,
-//     async (error) => {
-//       const originalRequest = error.config;
-      
-//       // Log error for debugging
-//       console.error("API Error:", {
-//         url: originalRequest.url,
-//         status: error.response?.status,
-//         message: error.response?.data?.message || error.message
-//       });
-  
-//       // Handle 404 specifically
-//       if (error.response?.status === 404) {
-//         return Promise.reject({
-//           message: 'Requested resource not found. Please check the URL.',
-//           code: 'RESOURCE_NOT_FOUND'
-//         });
-//       }
-  
-//       // Handle 401 errors for expired tokens
-//       if (error.response?.status === 401 && !originalRequest._retry) {
-//         if (isRefreshing) {
-//           return new Promise((resolve, reject) => {
-//             failedQueue.push({ resolve, reject });
-//           });
-//         }
-  
-//         originalRequest._retry = true;
-//         isRefreshing = true;
-  
-//         try {
-//           await axiosInstance.post("/auth/refresh-token");
-//           isRefreshing = false;
-//           processQueue(null, originalRequest);
-//           return axiosInstance(originalRequest);
-//         } catch (refreshError) {
-//           isRefreshing = false;
-//           processQueue(refreshError, null);
-          
-//           if (refreshError.response?.status === 401) {
-//             window.location.href = "/login";
-//           }
-//           return Promise.reject(refreshError);
-//         }
-//       }
-  
-//       // Format all other errors consistently
-//       return Promise.reject({
-//         message: error.response?.data?.message || 
-//                 'An unexpected error occurred. Please try again.',
-//         code: error.response?.status || 'UNKNOWN_ERROR',
-//         details: error.response?.data?.errors || undefined
-//       });
-//     }
-//   );
-//   export default axiosInstance;
-
-  
 

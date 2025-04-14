@@ -57,7 +57,7 @@ export const authenticate = async (req, res, next) => {
   console.log('Authenticating...');
   try {
     const token = req.cookies.token;
-    console.log(token, "token in auth");
+    console.log("Token to verify:", token);
 
     if (!token) {
       return res.status(401).json({ isAuthenticated: false, message: 'Not authenticated - no token provided' });
@@ -71,6 +71,8 @@ export const authenticate = async (req, res, next) => {
 
     // Use role to decide which model to query
     if (decoded.role === 'patient') {
+      console.log("Role in decoded token:", decoded.role);
+
       user = await Patient.findById(decoded.id).select('-password');
     } else if (decoded.role === 'doctor') {
       user = await Doctor.findById(decoded.id).select('-password');

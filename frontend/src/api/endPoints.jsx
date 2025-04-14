@@ -12,15 +12,15 @@ export const ENDPOINTS = {
     ADMIN_LOGIN: "/auth/admin-login",
   
     REFRESH_TOKEN: "/auth/refresh-token",
-    ME: "/auth/me",   //current logged-in user (Patient/Doctor/Admin)
+    ME: "/auth/current-user",   //current logged-in user (Patient/Doctor/Admin)
   },
     PATIENT: {
       DOCTORS: '/patient/doctors', // Updated path if you want to fetch doctors via patient route
       SINGLE_DOCTOR: (id) => `/patient/${id}`,
       SINGLE_DOCTOR_DETAILS: (id) => `/patient/${id}/details`,
-      BOOK_APPOINTMENT: '/appointments/book',
+      BOOK_APPOINTMENT: '/appointments/appointments/book',
       RESCHEDULE_APPOINTMENT: (id) => `/appointments/reschedule/${id}`,
-      CANCEL_APPOINTMENT: (id) => `/appointments/${id}`,
+      CANCEL_APPOINTMENT: (id) => `/appointments/${id}/cancel`,
       GET_APPOINTMENTS: '/appointments/appointments',
       PROFILE: '/patient/profile',
       // PROFILE:`/patient/${user._id}`,

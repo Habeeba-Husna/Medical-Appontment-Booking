@@ -17,18 +17,25 @@ import RescheduleAppointmentModal from '../modal/RescheduleAppointmentModal';
 
 const AppointmentsPage = () => {
   const dispatch = useDispatch();
-  const { appointments,status } = useAppSelector((state) => state.appointments);
 
-  useEffect(() => {
-    dispatch(fetchAppointments());
-  }, [dispatch]);
+    // Fetch appointments when component mounts
+    useEffect(() => {
+      dispatch(fetchAppointments());
+    }, [dispatch]);
+
+  const { 
+    appointments = [], 
+    upcomingAppointments = [], 
+    pastAppointments = [], 
+    status 
+  } = useAppSelector((state) => state.appointments);
+  
 
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
 
-  const now = new Date();
-
   const isToday = (dateString) => {
+    if (!dateString) return false;
     const date = new Date(dateString);
     const today = new Date();
     return (
@@ -38,25 +45,21 @@ const AppointmentsPage = () => {
     );
   };
 
-  const upcomingAppointments = appointments.filter(
-    (app) =>
-      app.status !== 'completed' &&
-      app.status !== 'cancelled' &&
-      !isToday(app.date)
+  const todayAppointments = upcomingAppointments.filter(app => 
+    app && isToday(app.date) && 
+    app.status && 
+    !['completed', 'cancelled'].includes(app.status.toLowerCase())
   );
 
-  const todayAppointments = appointments.filter(
-    (app) =>
-      isToday(app.date) &&
-      app.status !== 'completed' &&
-      app.status !== 'cancelled'
+  const futureAppointments = upcomingAppointments.filter(app => 
+    app && 
+    !isToday(app.date) && 
+    app.status && 
+    !['completed', 'cancelled'].includes(app.status.toLowerCase())
   );
-
-  const pastAppointments = appointments.filter(
-    (app) => app.status === 'completed' || app.status === 'cancelled'
-  );
-
+  
   const formatDate = (dateString) => {
+    if (!dateString) return 'Date not available';
     const options = {
       weekday: 'long',
       year: 'numeric',
@@ -67,7 +70,9 @@ const AppointmentsPage = () => {
   };
 
   const getStatusColor = (status) => {
-    switch (status) {
+    if (!status) return 'bg-gray-100 text-gray-800';
+    const lowerStatus = status.toLowerCase();
+    switch (lowerStatus) {
       case 'confirmed':
         return 'bg-green-100 text-green-800';
       case 'pending':
@@ -89,7 +94,6 @@ const AppointmentsPage = () => {
   const handleRescheduleSubmit = async ({ newDate, newTime, appointmentId }) => {
     try {
       await dispatch(rescheduleAppointment({ newDate, newTime, appointmentId })).unwrap();
-      
       await dispatch(fetchAppointments());
       toast.success('Appointment rescheduled successfully!');
       setShowRescheduleModal(false);
@@ -97,16 +101,15 @@ const AppointmentsPage = () => {
       toast.error(error.message || 'Failed to reschedule appointment.');
     }
   };
+
+const renderAppointmentCard = (appointment, highlightToday = false) => {
+  if (!appointment) return null;
+
+  const isPastAppointment = ['completed', 'cancelled'].includes(appointment.status?.toLowerCase());
   
-  const renderAppointmentCard = (appointment, highlightToday = false) => (
+  return (
     <Card
-      key={
-        appointment._id ??
-        appointment.id ??
-        (appointment.doctor && appointment.date && appointment.time
-          ? `${appointment.doctor.fullName}-${appointment.date}-${appointment.time}`
-          : Math.random())
-      }
+      key={appointment._id || `${appointment.doctorId?._id}-${appointment.date}-${appointment.time}`}
       className={highlightToday ? 'border-2 border-blue-500 bg-blue-50' : ''}
     >
       <CardContent className="p-6">
@@ -124,11 +127,11 @@ const AppointmentsPage = () => {
                 )}
               </div>
               <Badge className={getStatusColor(appointment.status)}>
-                {appointment.status?.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                {appointment.status?.charAt(0).toUpperCase() + appointment.status?.slice(1)}
               </Badge>
             </div>
             <p className="text-gray-600 mb-4">
-              {appointment.doctorId?.specialization}
+              {appointment.doctorId?.specialization || 'General Practice'}
             </p>
 
             <div className="space-y-2">
@@ -144,40 +147,96 @@ const AppointmentsPage = () => {
           </div>
 
           <div className="flex flex-row md:flex-col gap-2">
-            <Button
-              variant="outline"
-              className="text-medical-secondary border-medical-secondary hover:bg-medical-light flex-1"
-              onClick={() => handleRescheduleClick(appointment)}
-              disabled={status === 'loading'}  // Add disabled state
-              >
-                {status === 'loading' && selectedAppointment?._id === appointment._id 
-                  ? 'Processing...' 
-                  : 'Reschedule'}
-              </Button>
+            {isPastAppointment ? (
+              <>
+                {appointment.status?.toLowerCase() === 'completed' && (
+                  <Button 
+                    variant="outline" 
+                    className="text-medical-secondary border-medical-secondary hover:bg-medical-light flex-1"
+                  >
+                    View Prescription
+                  </Button>
+                )}
+                <Button 
+                  variant="outline" 
+                  className="text-medical-primary border-medical-primary hover:bg-medical-light flex-1"
+                  onClick={() => (window.location.href = '/doctors')}
+                >
+                  Book Again
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  className="text-medical-secondary border-medical-secondary hover:bg-medical-light flex-1"
+                  onClick={() => handleRescheduleClick(appointment)}
+                  disabled={status === 'loading'} 
+                >
+                  {status === 'loading' && selectedAppointment?._id === appointment._id 
+                    ? 'Processing...' 
+                    : 'Reschedule'}
+                </Button>
+                {/* <Button
+                  variant="outline"
+                  className="text-red-500 border-red-500 hover:bg-red-50 flex-1"
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to cancel this appointment?')) {
+                      dispatch(cancelAppointment(appointment._id));
+                      toast.success('Appointment cancelled successfully!');
+                    }
+                  }}
+                  disabled={status === 'loading'} 
+                >
+                  Cancel
+                </Button> */}
 
-               {/* Cancel Button */}
-            <Button
-              variant="outline"
-              className="text-red-500 border-red-500 hover:bg-red-50 flex-1"
-              onClick={() => {
-                if (window.confirm('Are you sure you want to cancel this appointment?')) {
-                  dispatch(cancelAppointment(appointment._id));
-                  toast.success('Appointment cancelled successfully!');
-                }
-              }}
-              disabled={status === 'loading'} 
-            >
-              Cancel
-            </Button>
-
+{appointment.status === 'cancelling' ? (
+  <span className="text-red-500 font-semibold flex items-center justify-center">
+    Cancelling...
+  </span>
+) : (
+  <Button
+  variant="outline"
+  className="text-red-500 border-red-500 hover:bg-red-50 flex-1"
+  onClick={() => {
+    if (window.confirm('Are you sure you want to cancel this appointment?')) {
+      dispatch(cancelAppointment(appointment._id))
+        .unwrap()
+        .then(() => {
+          toast.success('Appointment cancelled successfully!');
+          dispatch(fetchAppointments()); // Refresh the list
+        })
+        .catch((error) => {
+          toast.error(error.message || 'Failed to cancel appointment');
+        });
+    }
+  }}
+  disabled={status === 'loading'} 
+>
+  Cancel
+</Button>
+)}
+              </>
+            )}
           </div>
         </div>
       </CardContent>
     </Card>
   );
+};
+
+
+if (status === 'loading') {
+  return <div className="flex justify-center items-center h-64">Loading appointments...</div>;
+}
+
+if (status === 'failed') {
+  return <div className="text-red-500 text-center p-4">Error loading appointments. Please try again.</div>;
+}
 
   return (
-    <div>
+    <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">My Appointments</h1>
 
       <Tabs defaultValue="upcoming" className="w-full">
@@ -248,60 +307,13 @@ const AppointmentsPage = () => {
               <div className="flex items-center gap-2 text-gray-800 text-lg font-semibold mb-4">
                 <Calendar className="w-5 h-5" /> <span>Past Appointments</span>
               </div>
-              {pastAppointments.map((appointment) => (
-                <Card
-                  key={
-                    appointment._id ??
-                    appointment.id ??
-                    (appointment.doctorName && appointment.date && appointment.time
-                      ? `${appointment.doctorName}-${appointment.date}-${appointment.time}`
-                      : Math.random())
-                  }
-                  className="shadow-md"
-                >
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex justify-between mb-2">
-                          <h3 className="text-xl font-semibold text-medical-secondary">
-                            {appointment.doctor?.fullName}
-                          </h3>
-                          <Badge className={getStatusColor(appointment.status)}>
-                            {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
-                          </Badge>
-                        </div>
-                        <p className="text-gray-600 mb-4">{appointment.doctor?.specialization}</p>
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{formatDate(appointment.date)}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Clock className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{appointment.time}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        {appointment.status === 'completed' && (
-                          <Button variant="outline" className="text-medical-secondary border-medical-secondary hover:bg-medical-light w-full mb-2">
-                            View Prescription
-                          </Button>
-                        )}
-                        <Button variant="outline" className="text-medical-primary border-medical-primary hover:bg-medical-light w-full">
-                          Book Again
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+
+              {pastAppointments.map((appointment) => renderAppointmentCard(appointment))}
             </div>
           )}
         </TabsContent>
       </Tabs>
 
-      {/* Reschedule Modal */}
       <RescheduleAppointmentModal
         showRescheduleModal={showRescheduleModal}
         setShowRescheduleModal={setShowRescheduleModal}
@@ -313,3 +325,102 @@ const AppointmentsPage = () => {
 };
 
 export default AppointmentsPage;
+
+
+
+// const renderAppointmentCard = (appointment, highlightToday = false) => {
+//   if (!appointment) return null;
+
+//   const isPastAppointment = ['completed', 'cancelled'].includes(appointment.status?.toLowerCase());
+  
+//   return (
+//     <Card
+//       key={appointment._id || `${appointment.doctorId?._id}-${appointment.date}-${appointment.time}`}
+//       className={highlightToday ? 'border-2 border-blue-500 bg-blue-50' : ''}
+//     >
+//       <CardContent className="p-6">
+//         <div className="flex flex-col md:flex-row justify-between gap-4">
+//           <div className="flex-1">
+//             <div className="flex justify-between mb-2 items-center">
+//               <div className="flex items-center gap-2">
+//                 <h3 className="text-xl font-semibold text-medical-secondary">
+//                   {appointment.doctorId?.fullName || 'Unknown Doctor'}
+//                 </h3>
+//                 {highlightToday && (
+//                   <Badge className="bg-blue-200 text-blue-800 flex items-center gap-1">
+//                     <AlarmClock className="w-4 h-4" /> Today
+//                   </Badge>
+//                 )}
+//               </div>
+//               <Badge className={getStatusColor(appointment.status)}>
+//                 {appointment.status?.charAt(0).toUpperCase() + appointment.status?.slice(1)}
+//               </Badge>
+//             </div>
+//             <p className="text-gray-600 mb-4">
+//               {appointment.doctorId?.specialization || 'General Practice'}
+//             </p>
+
+//             <div className="space-y-2">
+//               <div className="flex items-center">
+//                 <Calendar className="h-4 w-4 mr-2 text-gray-500" />
+//                 <span>{formatDate(appointment.date)}</span>
+//               </div>
+//               <div className="flex items-center">
+//                 <Clock className="h-4 w-4 mr-2 text-gray-500" />
+//                 <span>{appointment.time}</span>
+//               </div>
+//             </div>
+//           </div>
+
+//           <div className="flex flex-row md:flex-col gap-2">
+//             {isPastAppointment ? (
+//               <>
+//                 {appointment.status?.toLowerCase() === 'completed' && (
+//                   <Button 
+//                     variant="outline" 
+//                     className="text-medical-secondary border-medical-secondary hover:bg-medical-light flex-1"
+//                   >
+//                     View Prescription
+//                   </Button>
+//                 )}
+//                 <Button 
+//                   variant="outline" 
+//                   className="text-medical-primary border-medical-primary hover:bg-medical-light flex-1"
+//                   onClick={() => (window.location.href = '/doctors')}
+//                 >
+//                   Book Again
+//                 </Button>
+//               </>
+//             ) : (
+//               <>
+//                 <Button
+//                   variant="outline"
+//                   className="text-medical-secondary border-medical-secondary hover:bg-medical-light flex-1"
+//                   onClick={() => handleRescheduleClick(appointment)}
+//                   disabled={status === 'loading'} 
+//                 >
+//                   {status === 'loading' && selectedAppointment?._id === appointment._id 
+//                     ? 'Processing...' 
+//                     : 'Reschedule'}
+//                 </Button>
+//                 <Button
+//                   variant="outline"
+//                   className="text-red-500 border-red-500 hover:bg-red-50 flex-1"
+//                   onClick={() => {
+//                     if (window.confirm('Are you sure you want to cancel this appointment?')) {
+//                       dispatch(cancelAppointment(appointment._id));
+//                       toast.success('Appointment cancelled successfully!');
+//                     }
+//                   }}
+//                   disabled={status === 'loading'} 
+//                 >
+//                   Cancel
+//                 </Button>
+//               </>
+//             )}
+//           </div>
+//         </div>
+//       </CardContent>
+//     </Card>
+//   );
+// };

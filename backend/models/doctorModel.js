@@ -123,15 +123,22 @@ const doctorSchema = new mongoose.Schema(
     isApproved: { type: Boolean, default: false },
     isProfileComplete: { type: Boolean, default: false },  // optional flag
 
+    // ratings: [
+    //   {
+    //     rating: { type: Number, required: true },
+    //     comment: { type: String },
+    //     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Patient' },
+    //     userName: { type: String },
+    //     createdAt: { type: Date, default: Date.now }
+    //   }
+    // ]
+
     ratings: [
       {
-        rating: { type: Number, required: true },
-        comment: { type: String },
-        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Patient' },
-        userName: { type: String },
-        createdAt: { type: Date, default: Date.now }
+        user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        rating: { type: Number, required: true }
       }
-    ]
+    ],
 
   },
   {

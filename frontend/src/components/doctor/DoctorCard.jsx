@@ -12,10 +12,21 @@ const DoctorCard = ({ doctor }) => {
   return (
     <Card className="w-full p-4 shadow-md rounded-xl relative">
       {/* Top-right rating */}
-      <div className="absolute top-4 right-4 flex items-center text-yellow-500 font-semibold">
+      {/* <div className="absolute top-4 right-4 flex items-center text-yellow-500 font-semibold">
         <Star className="w-4 h-4 fill-yellow-500 mr-1" />
         <span>{doctor.rating || 'N/A'}</span>
-      </div>
+      </div> */}
+
+<div className="absolute top-4 right-4 flex items-center text-yellow-500 font-semibold space-x-1"
+title={`Rated ${doctor.rating || 'N/A'} by ${doctor.totalRatings || 0} users`}
+>
+  <Star className="w-4 h-4 fill-yellow-500" />
+  <span>{doctor.rating || 'N/A'}</span>
+  <span className="text-gray-500 text-sm">
+    ({doctor.totalRatings || 0})
+  </span>
+</div>
+
 
       <CardContent className="p-0">
         {/* Top row: Small photo and text info */}

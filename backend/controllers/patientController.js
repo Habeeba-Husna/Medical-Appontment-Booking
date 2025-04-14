@@ -2,14 +2,16 @@ import Patient from '../models/patientModel.js';
 import Doctor from '../models/doctorModel.js';
 import { handleError } from '../utils/errorHandler.js';
 import { sendNotification } from '../config/emailConfig.js';
+import { computeNextAvailableSlot } from '../../frontend/src/utils/slotUtils.js';
 
-// Helper to compute next available slot
-const computeNextAvailableSlot = (slots) => {
-  if (!Array.isArray(slots) || slots.length === 0) return 'Not Available';
-  const sorted = slots.sort((a, b) => a.day.localeCompare(b.day));
-  const next = sorted[0];
-  return `${next.day} at ${next.startTime}`;
-};
+
+// // Helper to compute next available slot
+// const computeNextAvailableSlot = (slots) => {
+//   if (!Array.isArray(slots) || slots.length === 0) return 'Not Available';
+//   const sorted = slots.sort((a, b) => a.day.localeCompare(b.day));
+//   const next = sorted[0];
+//   return `${next.day} at ${next.startTime}`;
+// };
 
 // Get Patient Profile
 export const getPatientProfile = async (req, res) => {

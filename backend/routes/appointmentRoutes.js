@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.post('/appointments/book',authenticate,authorizeRoles('patient'), createAppointment);
 router.get('/appointments',authenticate,authorizeRoles('patient'), getAllAppointments);
-router.patch('/appointments/:appointmentId',authenticate,authorizeRoles('patient'), cancelAppointment);
+router.patch('/:appointmentId/cancel',authenticate,authorizeRoles('patient'), cancelAppointment);
 router.patch('/reschedule/:id',authenticate,authorizeRoles('patient'),rescheduleAppointment);
 
 export default router;

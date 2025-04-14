@@ -90,14 +90,17 @@
 
 
 
-
+import React, { useEffect } from 'react';
+import { useDispatch,useSelector  } from 'react-redux';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Provider } from 'react-redux';
-import {Toaster } from "sonner";
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 import store  from './redux/store';
+import ErrorBoundary from './utils/ErrorBoundary';
+import {fetchCurrentUser} from './store/slices/authSlice';
 // import ToastContainer from "./components/ui/ToastContainer";
 
 import HomePage from "./pagess/HomePage";
@@ -117,32 +120,28 @@ import ProfilePage from "./pagess/ProfilePage";
 import MainLayout from "./components/layout/MainLayout";
 import NotFound from "./pagess/NotFound";
 import DoctorDetailsPage from "./pagess/DoctorDetailsPage";
-import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer } from 'react-toastify';
-
 import ProtectedRoute from './routes/ProtectedRoute';
-
-// import DoctorDashboardPage from "./pagess/DoctorDashboardPage";
-
-
-// import AdminDashboard from './pages/AdminDashboard';
-
-
-
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <Provider store={store}>
+const App = () =>{
+  const dispatch = useDispatch();
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      dispatch(fetchCurrentUser());
+    }
+  }, [isLoggedIn]);
+
+return  (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
       {/* <Toaster  richColors position="top-center" closeButton /> Toaster
        */}
        <ToastContainer position="top-right" autoClose={3000} />
-      
-        {/* <ToastContainer /> */}
         <BrowserRouter>
-       
           <Routes>
 
             <Route path="/" element={<HomePage />} />
@@ -167,10 +166,6 @@ const App = () => (
               {/* <Route path="/dashboard2" element={<DoctorDashboardPage />} /> */}
               
             </Route>
-
-
-
-
             {/* ✅ Role-Protected Routes */}
   {/* <Route
     path="/admin-dashboard"
@@ -189,18 +184,14 @@ const App = () => (
       </ProtectedRoute>
     }
   /> */}
-
-
-            
             {/* 404 Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
-  </Provider>
- 
 );
+};
 
 export default App;
 

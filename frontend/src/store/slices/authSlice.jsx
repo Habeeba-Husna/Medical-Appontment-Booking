@@ -46,26 +46,6 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-
-// export const registerUser = createAsyncThunk(
-//   'auth/registerUser',
-//   async ({ formData, role }, { rejectWithValue }) => {
-//     try {
-//       const endpoint =
-//         role === 'Patient'
-//           ? ENDPOINTS.AUTH.REGISTER_PATIENT
-//           : ENDPOINTS.AUTH.REGISTER_DOCTOR;
-
-//       const response = await axiosInstance.post(endpoint, formData);
-//       return response.data;
-//     } catch (error) {
-//       return rejectWithValue(
-//         error?.response?.data?.message || error?.message || 'Something went wrong'
-//       );
-//     }
-//   }
-// );
-
 // Forgot Password
 export const forgotPassword = createAsyncThunk(
   'auth/forgotPassword',
@@ -92,19 +72,6 @@ export const resetPassword = createAsyncThunk(
   }
 );
 
-// Login User
-// export const loginUser = createAsyncThunk(
-//   'auth/login',
-//   async (credentials, { rejectWithValue }) => {
-//     try {
-//       const response = await axiosInstance.post(ENDPOINTS.AUTH.LOGIN, credentials);
-//       return response.data;
-//     } catch (error) {
-//       return rejectWithValue(error.response?.data || 'Login failed');
-//     }
-//   }
-// );
-
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ email, password, role }, { rejectWithValue }) => {
@@ -115,8 +82,13 @@ export const loginUser = createAsyncThunk(
         role,
       });
 
+
+      const { token, user } = response.data.data;
+      const fullUser = { token, ...user };
+      return fullUser;
+
       // Your backend sends userData inside response.data.data
-      return response.data.data.token; 
+      // return response.data.data.token; 
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || 'Login failed. Please try again.'
@@ -125,6 +97,17 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+export const fetchCurrentUser = createAsyncThunk(
+  'auth/fetchCurrentUser',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(ENDPOINTS.AUTH.ME, { withCredentials: true });
+      return response.data.user;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to fetch user');
+    }
+  }
+);
 
 // Logout User
 export const logoutUser = createAsyncThunk(
@@ -156,6 +139,9 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    setCredentials: (state, action) => {
+      state.user = action.payload;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -164,13 +150,37 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
+      // .addCase(loginUser.fulfilled, (state, action) => {
+      //   state.loading = false;
+      //   // Normalize the user data structure
+      //   state.user = {
+      //     ...action.payload, // Spread the user object
+      //     role: action.payload.role.toLowerCase()
+      //   };
+      //   Cookies.set('token', action.payload.token, { expires: 1 });
+      //   state.error = null;
+    
+      // })
+
       .addCase(loginUser.fulfilled, (state, action) => {
+        console.log("Login success:", action.payload);
+        const { token, _id, fullName, email, role } = action.payload;
         state.loading = false;
-        state.user = action.payload.user;
+        state.user = {
+          token,
+          _id,
+          fullName,
+          email,
+          role: role.toLowerCase()
+        };
+        Cookies.set('token', token, { expires: 1 });
+        state.error = null;
       })
+      
       .addCase(loginUser.rejected, (state, action) => {
+        console.log("Login failed:", action.payload);
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || "Login failed. Please try again.";
       })
 
       // Register
@@ -213,6 +223,19 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
+         
+.addCase(fetchCurrentUser.pending, (state) => {
+  state.loading = true;
+  // state.error = null;
+})
+.addCase(fetchCurrentUser.fulfilled, (state, action) => {
+  state.loading = false;
+  state.user = action.payload;  // Save user data in Redux state
+})
+.addCase(fetchCurrentUser.rejected, (state, action) => {
+  state.loading = false;
+  state.error = action.payload  || action.error.message;
+})
       // Logout
       .addCase(logoutUser.pending, (state) => {
         state.loading = true;

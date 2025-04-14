@@ -222,17 +222,17 @@ const Login = () => {
       response = await dispatch(loginUser({ email, password, role })).unwrap();
     }
 
-      // Save the access token and role in cookies after successful login
-      Cookies.set('accessToken', response.accessToken, {
-        expires: 1, // 1 day expiration
-        secure: true, // Only sent over HTTPS
-        sameSite: 'Strict',
-      });
-      Cookies.set('userRole', role, {
-        expires: 1,
-        secure: true,
-        sameSite: 'Strict',
-      });
+      // // Save the access token and role in cookies after successful login
+      // Cookies.set('accessToken', response.accessToken, {
+      //   expires: 1, // 1 day expiration
+      //   secure: true, // Only sent over HTTPS
+      //   sameSite: 'Strict',
+      // });
+      // Cookies.set('userRole', role, {
+      //   expires: 1,
+      //   secure: true,
+      //   sameSite: 'Strict',
+      // });
 
       
       // Redirect user based on role
@@ -327,3 +327,26 @@ const Login = () => {
 };
 
 export default Login;
+
+
+
+// return (
+//   <form onSubmit={handleSubmit}>
+//     <input 
+//       type="email" 
+//       value={email} 
+//       onChange={(e) => setEmail(e.target.value)} 
+//       placeholder="Email" 
+//       required 
+//     />
+//     <input 
+//       type="password" 
+//       value={password} 
+//       onChange={(e) => setPassword(e.target.value)} 
+//       placeholder="Password" 
+//       required 
+//     />
+//     <button type="submit" disabled={isLoading}>Login</button>
+//     {error && <p>{error}</p>}
+//   </form>
+// );
