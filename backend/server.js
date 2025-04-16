@@ -145,9 +145,10 @@ app.use('/api/patient', patientRoutes);
 // app.use('/api/doctor', doctorRoutes);
 app.use('/api/appointments', appointmentRoutes);
 
-// Serve static files from uploads directory
-const __dirname = path.resolve(); // Get current directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// // Serve static files from uploads directory
+// const __dirname = path.resolve(); // Get current directory
+
+//app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // app.use('/uploads', express.static(path.join(path.resolve(), 'uploads')));
 

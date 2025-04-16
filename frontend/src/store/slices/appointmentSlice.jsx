@@ -37,17 +37,38 @@ export const fetchAppointments = createAsyncThunk(
 export const cancelAppointment = createAsyncThunk(
   'appointments/cancelAppointment',
   async (appointmentId, thunkAPI) => {
+    console.log("appointmentId.......",appointmentId)
     try {
       const response = await axiosInstance.patch(
          `${ENDPOINTS.PATIENT.CANCEL_APPOINTMENT(appointmentId)}`
       );
+      console.log("appo...........",{ appointmentId, status: 'cancelled' })
       return { appointmentId, status: 'cancelled' };
     } catch (error) {
+      console.log(error.response?.data)
       return thunkAPI.rejectWithValue(error.response?.data || 'Failed to cancel appointment');
     }
   }
 );
 
+
+// export const rescheduleAppointment = createAsyncThunk(
+//   'appointments/rescheduleAppointment',
+//   async ({ newDate, newTime, appointmentId }, thunkAPI) => {
+//     try {
+//       const response = await axiosInstance.patch(
+//         `${ENDPOINTS.PATIENT.RESCHEDULE_APPOINTMENT(appointmentId)}`,
+//         { newDate, newTime },
+//         {
+//           withCredentials: true // This sends the auth cookie
+//         }
+//       );
+//       return response.data;
+//     } catch (error) {
+//       return thunkAPI.rejectWithValue(error.response?.data);
+//     }
+//   }
+// );
 
 export const rescheduleAppointment = createAsyncThunk(
   'appointments/rescheduleAppointment',
@@ -55,14 +76,20 @@ export const rescheduleAppointment = createAsyncThunk(
     try {
       const response = await axiosInstance.patch(
         `${ENDPOINTS.PATIENT.RESCHEDULE_APPOINTMENT(appointmentId)}`,
-        { newDate, newTime },
-        {
-          withCredentials: true // This sends the auth cookie
-        }
+        { newDate, newTime }
       );
-      return response.data;
+      return response.data; // Make sure this returns the updated appointment
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data);
+      let errorMessage = 'Failed to reschedule appointment';
+      if (error.response) {
+        // Handle 409 specifically
+        if (error.response.status === 409) {
+          errorMessage = error.response.data.message || 'Time slot not available';
+        } else {
+          errorMessage = error.response.data.message || errorMessage;
+        }
+      }
+      return thunkAPI.rejectWithValue(errorMessage);
     }
   }
 );
@@ -120,71 +147,60 @@ const appointmentSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-  //     .addCase(fetchAppointments.fulfilled, (state, action) => {
-  //     const appointmentsArray = Array.isArray(action.payload)? action.payload : action.payload?.appointments || [];
-  //       state.appointments = appointmentsArray;
-
-  //     const today = new Date().toISOString().split('T')[0];
-  //     const currentTime = new Date().toLocaleTimeString('en-US', { 
-  //       hour12: false, 
-  //       hour: '2-digit', 
-  //       minute: '2-digit' 
-  //     }).replace(/:\d+ /, ':'); // Format as HH:MM
 
 
-  //    // Filter appointments
-  //    state.upcomingAppointments = appointmentsArray.filter(app => 
-  //     app.status !== 'cancelled' && 
-  //     app.status !== 'completed' && 
-  //     (app.date > today || 
-  //     //  (app.date === today && app.time >= currentTime))
-  //     (app.date > today || (app.date === today && app.time >= currentTime)))
+// .addCase(fetchAppointments.fulfilled, (state, action) => {
+//   const appointmentsArray = action.payload.all || action.payload;
+  
+//   state.appointments = appointmentsArray;
+  
+//   const now = new Date();
+//   const today = now.toISOString().split('T')[0];
+  
+//   state.upcomingAppointments = appointmentsArray.filter(app => {
+//     const appDate = new Date(app.date).toISOString().split('T')[0];
+//     const isFutureDate = appDate > today;
+//     const isToday = appDate === today;
+    
+//     return (
+//       ['pending', 'confirmed'].includes(app.status.toLowerCase()) && 
+//       (isFutureDate || (isToday && app.time >= now.toLocaleTimeString('en-US', { hour12: false })))
+//     );
+//   });
 
-  //   );
+//   state.pastAppointments = appointmentsArray.filter(app => {
+//     const appDate = new Date(app.date).toISOString().split('T')[0];
+//     const isPastDate = appDate < today;
+//     const isToday = appDate === today;
+    
+//     return (
+//       ['completed', 'cancelled'].includes(app.status.toLowerCase()) ||
+//       isPastDate ||
+//       (isToday && app.time < now.toLocaleTimeString('en-US', { hour12: false }))
+//     );
+//   });
 
-  //   state.pastAppointments = appointmentsArray.filter(app => 
-  //     app.status === 'completed' || 
-  //     app.status === 'cancelled' || 
-  //     (app.date < today || (app.date === today && app.time < currentTime))
-  //   );
+//   state.loading = false;
+// })
 
-  //   state.loading = false;
-  // })
-
-
-  // In your fetchAppointments.fulfilled reducer
 .addCase(fetchAppointments.fulfilled, (state, action) => {
-  const appointmentsArray = action.payload.all || action.payload;
-  
-  state.appointments = appointmentsArray;
-  
-  const now = new Date();
-  const today = now.toISOString().split('T')[0];
-  
-  state.upcomingAppointments = appointmentsArray.filter(app => {
-    const appDate = new Date(app.date).toISOString().split('T')[0];
-    const isFutureDate = appDate > today;
-    const isToday = appDate === today;
-    
-    return (
-      ['pending', 'confirmed'].includes(app.status.toLowerCase()) && 
-      (isFutureDate || (isToday && app.time >= now.toLocaleTimeString('en-US', { hour12: false })))
-    );
-  });
-
-  state.pastAppointments = appointmentsArray.filter(app => {
-    const appDate = new Date(app.date).toISOString().split('T')[0];
-    const isPastDate = appDate < today;
-    const isToday = appDate === today;
-    
-    return (
-      ['completed', 'cancelled'].includes(app.status.toLowerCase()) ||
-      isPastDate ||
-      (isToday && app.time < now.toLocaleTimeString('en-US', { hour12: false }))
-    );
-  });
-
   state.loading = false;
+  
+  if (!action.payload || typeof action.payload !== 'object') {
+    state.error = 'Invalid appointments data';
+    return;
+  }
+
+  // Use the structure from API
+  state.appointments = Array.isArray(action.payload.all) ? action.payload.all : [];
+  state.upcomingAppointments = Array.isArray(action.payload.upcoming) ? action.payload.upcoming : [];
+  state.pastAppointments = Array.isArray(action.payload.past) ? action.payload.past : [];
+
+  // If for some reason the API changes, fall back to client-side filtering
+  if (state.appointments.length === 0 && 
+      (state.upcomingAppointments.length > 0 || state.pastAppointments.length > 0)) {
+    state.appointments = [...state.upcomingAppointments, ...state.pastAppointments];
+  }
 })
 
 
@@ -212,7 +228,7 @@ const appointmentSlice = createSlice({
         // state.loading = false;
 
         const newAppointment = action.payload;
-      
+      console.log(newAppointment,"new { appointmentId, status: 'cancelled' }")
       // Remove temp appointment if exists
       state.appointments = state.appointments.filter(
         app => app._id !== state.tempAppointmentId
@@ -253,26 +269,49 @@ const appointmentSlice = createSlice({
         }
       })
     // Add this case to your extraReducers
-.addCase(cancelAppointment.fulfilled, (state, action) => {
-  const { appointment } = action.payload; // Assuming backend returns the updated appointment
+// .addCase(cancelAppointment.fulfilled, (state, action) => {
+//   const { appointmentId ,status} = action.payload; // Assuming backend returns the updated appointment
   
-  // Update the main appointments array
+//   // Update the main appointments array
+//   state.appointments = state.appointments.map(app => 
+//     app._id === appointmentId ? appointmentId : app
+//   );
+
+//   // Filter out canceled appointments from upcoming
+//   state.upcomingAppointments = state.upcomingAppointments.filter(
+//     app => app._id !== appointmentId
+//   );
+
+//   // Add to past appointments if needed
+//   if (status.toLowerCase() === 'cancelled') {
+//     state.pastAppointments.unshift(appointmentId);
+//   }
+
+//   state.loading = false;
+// })
+
+.addCase(cancelAppointment.fulfilled, (state, action) => {
+  const { appointmentId, status } = action.payload;
+  
+  // Update the appointment status in all arrays
   state.appointments = state.appointments.map(app => 
-    app._id === appointment._id ? appointment : app
+    app._id === appointmentId ? { ...app, status } : app
   );
-
-  // Filter out canceled appointments from upcoming
-  state.upcomingAppointments = state.upcomingAppointments.filter(
-    app => app._id !== appointment._id
-  );
-
-  // Add to past appointments if needed
-  if (appointment.status.toLowerCase() === 'cancelled') {
-    state.pastAppointments.unshift(appointment);
+  
+  state.upcomingAppointments = state.upcomingAppointments
+    .filter(app => app._id !== appointmentId);
+    
+  // Add to past appointments if cancelled
+  if (status.toLowerCase() === 'cancelled') {
+    const cancelledApp = state.appointments.find(app => app._id === appointmentId);
+    if (cancelledApp) {
+      state.pastAppointments.unshift(cancelledApp);
+    }
   }
 
   state.loading = false;
 })
+
 .addCase(cancelAppointment.rejected, (state, action) => {
   state.loading = false;
   state.error = action.payload || 'Failed to cancel appointment';
@@ -292,32 +331,49 @@ const appointmentSlice = createSlice({
       })
 
        
-      .addCase(rescheduleAppointment.fulfilled, (state, action) => {
-        const updatedAppointment = action.payload;
-        // const index = state.appointments.findIndex(app => app._id === updatedAppointment._id);
-        // if (index !== -1) {
-        //   state.appointments[index] = updatedAppointment;
-        // }
+  //     .addCase(rescheduleAppointment.fulfilled, (state, action) => {
+  //       const updatedAppointment = action.payload;
 
+  //     state.appointments = state.appointments.map(app => 
+  //       app._id === updatedAppointment._id 
+  // ? { ...app, ...updatedAppointment, isRescheduling: false } 
+  // : app
 
-        // Update all relevant arrays
-      // state.appointments = state.appointments.map(app => 
-      //   app._id === updatedAppointment._id ? updatedAppointment : app
-      // );
-
-      state.appointments = state.appointments.map(app => 
-        app._id === updatedAppointment._id 
-  ? { ...app, ...updatedAppointment, isRescheduling: false } 
-  : app
-
-      );
+  //     );
       
-      state.upcomingAppointments = state.upcomingAppointments.map(app =>
-        app._id === updatedAppointment._id ? updatedAppointment : app
-      );
+  //     state.upcomingAppointments = state.upcomingAppointments.map(app =>
+  //       app._id === updatedAppointment._id ? updatedAppointment : app
+  //     );
       
-      state.loading = false;
-      })
+  //     state.loading = false;
+// })
+
+  .addCase(rescheduleAppointment.fulfilled, (state, action) => {
+    const updatedAppointment = action.payload;
+    
+    // Update appointments array
+    state.appointments = state.appointments.map(app => 
+      app._id === updatedAppointment._id ? updatedAppointment : app
+    );
+  
+    // Update upcoming appointments
+    state.upcomingAppointments = state.upcomingAppointments.map(app =>
+      app._id === updatedAppointment._id ? updatedAppointment : app
+    );
+  
+    // If the new date is in the past, move to past appointments
+    const now = new Date();
+    const appointmentDate = new Date(updatedAppointment.date);
+    if (appointmentDate < now) {
+      state.upcomingAppointments = state.upcomingAppointments.filter(
+        app => app._id !== updatedAppointment._id
+      );
+      state.pastAppointments.unshift(updatedAppointment);
+    }
+  
+    state.loading = false;
+  })
+     
       .addCase(rescheduleAppointment.rejected, (state, action) => {
         // Revert optimistic update
         const { appointmentId } = action.meta.arg;

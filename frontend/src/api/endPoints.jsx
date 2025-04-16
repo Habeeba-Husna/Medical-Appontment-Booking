@@ -22,7 +22,7 @@ export const ENDPOINTS = {
       RESCHEDULE_APPOINTMENT: (id) => `/appointments/reschedule/${id}`,
       CANCEL_APPOINTMENT: (id) => `/appointments/${id}/cancel`,
       GET_APPOINTMENTS: '/appointments/appointments',
-      PROFILE: '/patient/profile',
+      PROFILE: 'api/patient/profile',
       // PROFILE:`/patient/${user._id}`,
       UPDATE_PROFILE: '/patient/profile/update',
       NOTIFICATIONS: '/notifications',

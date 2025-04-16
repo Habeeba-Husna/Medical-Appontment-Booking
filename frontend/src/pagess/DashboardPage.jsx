@@ -5,15 +5,15 @@ import { useAppSelector } from '../hooks/useAppSelector';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 
 const DashboardPage = () => {
-  // const { name } = useAppSelector(state => state.auth);
-  const { user } = useAppSelector(state => state.auth);
+  const user  = useAppSelector((state) =>state.auth.user);
+  console.log("dashboard top use........",user)
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Welcome, {user?.name || 'User'}</h1>
+      {/* <div>
+        <h1 className="text-3xl font-bold mb-2">Welcome, {user?.fullName || 'User'}</h1>
         <p className="text-gray-500">Manage your health journey from your personal dashboard</p>
-      </div>
+      </div> */}
       
       <QuickActions />
       

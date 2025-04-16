@@ -43,7 +43,8 @@ const UpcomingAppointments = () => {
 
   const handleViewDetails = (appointmentId) => {
     dispatch(selectAppointment(appointmentId));
-    navigate(`/appointments/${appointmentId}`);
+    // navigate(`/appointments/${appointmentId}`);
+    navigate("/appointments");
   };
 
   const handleCancelAppointment = async (appointmentId) => {

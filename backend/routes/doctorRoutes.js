@@ -34,8 +34,8 @@ const router = express.Router();
 // router.get('/profile', getDoctorProfile);
 // router.put('/profile', updateDoctorProfile);
 
-router.get("/profile", getCurrentDoctorProfile);
-
+// router.get("/profile", getCurrentDoctorProfile);
+// router.get('/approved', getApprovedDoctors);
 // Then dynamic one
 router.get("/:id", getDoctorProfileById);
 

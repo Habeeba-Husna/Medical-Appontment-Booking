@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import {Button} from '../ui/Button';
+import { Button } from '../ui/Button';
 import { useAppSelector } from '../../hooks/useAppSelector';
 
 const Navbar = () => {
@@ -19,7 +19,8 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <span className="text-xl font-bold text-medical-secondary">
-              HealthHarbor Connect
+              {/* HealthHarbor Connect */}
+              HealWise
             </span>
           </Link>
 
@@ -28,15 +29,9 @@ const Navbar = () => {
             <Link to="/" className="px-3 py-2 text-gray-700 hover:text-medical-primary">
               Home
             </Link>
-            <Link to="/doctors" className="px-3 py-2 text-gray-700 hover:text-medical-primary">
-              Find Doctors
-            </Link>
-            <Link to="/about" className="px-3 py-2 text-gray-700 hover:text-medical-primary">
-              About Us
-            </Link>
-            <Link to="/contact" className="px-3 py-2 text-gray-700 hover:text-medical-primary">
-              Contact
-            </Link>
+            <a href="#users" className="px-3 py-2 text-gray-700 hover:text-medical-primary">Users</a>
+            <a href="#Testimonials" className="px-3 py-2 text-gray-700 hover:text-medical-primary">Testimonials</a>
+            <a href="#Contact" className="px-3 py-2 text-gray-700 hover:text-medical-primary">Contact</a>
           </div>
 
           {/* Auth Buttons - Desktop */}
@@ -83,37 +78,37 @@ const Navbar = () => {
       {mobileMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 bg-white shadow-lg absolute w-full z-50">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="block px-3 py-2 text-gray-700 hover:text-medical-primary"
               onClick={() => setMobileMenuOpen(false)}
             >
               Home
             </Link>
-            <Link 
-              to="/doctors" 
+            <a
+              href="#users"
               className="block px-3 py-2 text-gray-700 hover:text-medical-primary"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Find Doctors
-            </Link>
-            <Link 
-              to="/about" 
+              Users
+            </a>
+            <a
+              href="#Testimonials"
               className="block px-3 py-2 text-gray-700 hover:text-medical-primary"
               onClick={() => setMobileMenuOpen(false)}
             >
-              About Us
-            </Link>
-            <Link 
-              to="/contact" 
+              Testimonials
+            </a>
+            <a
+              href="#Contact"
               className="block px-3 py-2 text-gray-700 hover:text-medical-primary"
               onClick={() => setMobileMenuOpen(false)}
             >
               Contact
-            </Link>
+            </a>
             <div className="pt-4 pb-2 border-t border-gray-200 flex flex-col space-y-2">
               {isAuthenticated ? (
-                <Link 
+                <Link
                   to="/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -123,7 +118,7 @@ const Navbar = () => {
                 </Link>
               ) : (
                 <>
-                  <Link 
+                  <Link
                     to="/login"
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -131,7 +126,7 @@ const Navbar = () => {
                       Sign In
                     </Button>
                   </Link>
-                  <Link 
+                  <Link
                     to="/register"
                     onClick={() => setMobileMenuOpen(false)}
                   >

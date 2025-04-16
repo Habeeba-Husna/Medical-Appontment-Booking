@@ -80,6 +80,7 @@ const doctorList = doctors?.doctors || [];
 
   // Check authentication on mount
   useEffect(() => {
+    console.log(user,"user in useeffect" )
     if (!user) {
       dispatch(fetchCurrentUser())
         .unwrap()
@@ -184,6 +185,7 @@ setAvailableTimes(remainingTimes);
 };
   
   const handleBookAppointment = async () => {
+    console.log(user,"in handle appoint")
     if (!user) {
       toast.error('Please login to book appointments');
       navigate('/login');

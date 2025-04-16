@@ -19,9 +19,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        "medical-secondary": "#1E40AF", // Example: Blue
-        "medical-light": "#E0F2FE", // Example: Light Blue
-        "medical-primary": "#2563EB", // Example: Dark Blue
+        "medical-secondary": "#1E40AF", // Blue
+        "medical-light": "#E0F2FE", // Light Blue
+        "medical-primary": "#2563EB", //Dark Blue
+        "medical-green": "rgba(16, 185, 129, 0.9)",
+        "medical-red": "#DC2626",
+        "medical-sky": "rgb(143, 212, 227)",
         "card": "#FFFFFF",
         "card-foreground": "#111827",
         "text-muted-foreground": "#6B7280"

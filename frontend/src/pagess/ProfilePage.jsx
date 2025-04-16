@@ -427,12 +427,21 @@ const ProfilePage  = ({ profile }) => {
 
 
   useEffect(() => {
+    // First, try to load from localStorage
+    const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    setUser(JSON.parse(storedUser));
+    console.log('Loaded user from localStorage');
+  }
     const getProfile = async () => {
       try {
         const res = await axiosInstance.get('/patient/profile', {
           withCredentials: true,
         });
         setUser(res.data);
+           //  Store user temporarily on frontend (not for auth)
+      localStorage.setItem('user', JSON.stringify(res.data));
+      
       } catch (err) {
         console.error("Error fetching profile", err);
       }
@@ -459,6 +468,7 @@ const ProfilePage  = ({ profile }) => {
         console.error('Failed to fetch updated profile', error);
       }
     };
+   
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
@@ -482,7 +492,7 @@ const ProfilePage  = ({ profile }) => {
       // Show temporary preview
       setTempPhoto(URL.createObjectURL(file));
   
-      const response = await axiosInstance.post(
+      const response = await axiosInstance.patch(
         '/patient/upload-profile-photo',
         formData,
         {
@@ -490,16 +500,15 @@ const ProfilePage  = ({ profile }) => {
             'Content-Type': 'multipart/form-data',
           },
           withCredentials: true,
+          timeout: 10000,
         }
       );
-  
-      // Update profile data
-      await fetchUpdatedProfile();
-      
-     // Update local state directly from response if possible
-    if (response.data.profilePhoto) {
-      setUser(prev => ({...prev, profilePhoto: response.data.profilePhoto}));
-    }
+
+   // Update the user state with the new photo URL
+   setUser(prev => ({ ...prev, profilePhoto: response.data.data.profilePhoto }));
+
+   // Fetch updated profile data
+   await fetchUpdatedProfile();
     
     toast({
       title: 'Success!',
@@ -586,12 +595,16 @@ const ProfilePage  = ({ profile }) => {
 //   className="object-cover"
 // />
 
+// <img
+//   src={getFullPhotoUrl(user?.profilePhoto)}
+//   alt="Profile"
+//   className="w-32 h-32 rounded-full object-cover"
+// />
 <img
-  src={getFullPhotoUrl(user?.profilePhoto)}
+  src={user?.profilePhoto || '/default-avatar.png ||defaultProfileImage'}  // Fallback to default image
   alt="Profile"
   className="w-32 h-32 rounded-full object-cover"
 />
-
 
     ) : (
       <>

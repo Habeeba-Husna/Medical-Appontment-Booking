@@ -12,6 +12,7 @@ import {
 import getUserById from '../utils/getUserById.js';
 import { ApiError } from '../utils/errorHandler.js';
 
+import { verifyToken } from '../utils/jwt.js';
 //REGISTRATION CONTROLLERS 
 export const registerPatient = asyncHandler(async (req, res) => {
   const result = await registerPatientService(req.body);
@@ -95,14 +96,16 @@ export const refreshToken = asyncHandler(async (req, res) => {
 
 export const getCurrentUser = asyncHandler(async (req, res) => {
   const token = req.cookies?.token;
-
+  console.log(token,"fron current user")
   if (!token) {
     throw new ApiError(401, 'Not authenticated');
   }
 
   let decoded;
   try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // decoded = jwt.verify(token, process.env.JWT_SECRET);
+   decoded = verifyToken(token);
+   console.log("decode data fron the current user............'''''",decoded)
   } catch (err) {
     throw new ApiError(401, 'Invalid or expired token');
   }

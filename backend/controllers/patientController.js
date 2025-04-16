@@ -100,25 +100,21 @@ export const updatePatientProfile = async (req, res) => {
     });
   }
 };
+// controllers/patientController.js
 
 export const uploadProfilePhoto = async (req, res) => {
-  console.log('Upload profile photo route hit');
   try {
-    // Use req.user instead of req.patient since that's what authenticate sets
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ message: 'Not authenticated' });
-    }
+    const patientId = req.user.id;
+    const updates = req.body; // Other fields like name, age, etc.
 
-    if (!req.file) {
-      console.log("Authenticated user ID:", req.user.id);
-
-      return res.status(400).json({ message: 'No file uploaded' });
+    // If image uploaded, add profilePhoto field to updates
+    if (req.file && req.file.path) {
+      updates.profilePhoto = req.file.path;
     }
-    
 
     const updatedPatient = await Patient.findByIdAndUpdate(
-      req.user.id, // Changed from req.patient._id
-      { profilePhoto: req.file.path },
+      patientId,
+      { $set: updates },
       { new: true }
     ).select('-password');
 
@@ -127,26 +123,61 @@ export const uploadProfilePhoto = async (req, res) => {
     }
 
     res.status(200).json({
-      message: 'Profile photo uploaded successfully',
-      profilePhoto: updatedPatient.profilePhoto,
+      message: 'Profile updated successfully',
+      data: updatedPatient,
     });
   } catch (error) {
-    console.error('Error uploading profile photo:', error);
-    
-    if (req.file?.path) {
-      try {
-        await cloudinary.uploader.destroy(req.file.filename);
-      } catch (cleanupError) {
-        console.error('Error cleaning up file:', cleanupError);
-      }
-    }
-    
-    res.status(500).json({ 
-      message: 'Failed to upload profile photo',
-      error: error.message 
-    });
+    console.error('Error updating profile:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+
+// export const uploadProfilePhoto = async (req, res) => {
+//   console.log('Upload profile photo route hit');
+//   try {
+//     console.log("image edit in controller,...........")
+//     // Use req.user instead of req.patient since that's what authenticate sets
+//     if (!req.user || !req.user.id) {
+//       return res.status(401).json({ message: 'Not authenticated' });
+//     }
+
+//     if (!req.file) {
+//       return res.status(400).json({ message: 'No file uploaded' });
+//     }
+    
+
+//     const updatedPatient = await Patient.findByIdAndUpdate(
+//       req.user.id, // Changed from req.patient._id
+//       { profilePhoto: req.file.path },
+//       { new: true }
+//     ).select('-password');
+//     console.log(updatedPatient,"updatedPatient..........")
+//     if (!updatedPatient) {
+//       return res.status(404).json({ message: 'Patient not found' });
+//     }
+
+//     res.status(200).json({
+//       message: 'Profile photo uploaded successfully',
+//       profilePhoto: updatedPatient.profilePhoto,
+//     });
+//   } catch (error) {
+//     console.error('Error uploading profile photo:', error);
+    
+//     if (req.file?.path) {
+//       try {
+//         await cloudinary.uploader.destroy(req.file.filename);
+//       } catch (cleanupError) {
+//         console.error('Error cleaning up file:', cleanupError);
+//       }
+//     }
+    
+//     res.status(500).json({ 
+//       message: 'Failed to upload profile photo',
+//       error: error.message 
+//     });
+//   }
+// };
 
 // Get all patients (Admin)
 export const getAllPatients = async (req, res) => {

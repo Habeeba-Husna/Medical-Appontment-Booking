@@ -195,11 +195,6 @@ export const createAppointment = async (req, res) => {
 // Check doctor availability
 const isAvailable = await checkDoctorAvailability(doctorId, date, time);
 if (!isAvailable) {
-  console.log(`Checking availability for doctor ${doctorId} at ${date} ${time}`);
-  
-  
-
-
   return res.status(409).json({ message: 'Doctor not available at this time' });
 }
 
@@ -284,7 +279,6 @@ await sendNotification(
     });
 
   } catch (error) {
-    console.error('Appointment creation error:', error);
     res.status(500).json({ 
       message: error.message || 'Failed to create appointment' 
     });
@@ -449,12 +443,6 @@ export const rescheduleAppointment = async (req, res) => {
     const { newDate, newTime } = req.body;
     const patientId = req.user?.id;
 
-    console.log("Patient:", req.user);
-console.log("User:", req.user);
-
-
-    console.log("Incoming data:", { id, newDate, newTime, patientId });
-
     if (!newDate || !newTime) {
       return res.status(400).json({
         message: 'New date and time are required',
@@ -463,12 +451,8 @@ console.log("User:", req.user);
 
     // Validate that the new time is in the future
     const selectedDateTime = new Date(`${newDate}T${newTime}`);
-    const now = new Date();
-    
-    if (selectedDateTime <= now) {
-      return res.status(400).json({
-        message: 'New appointment time must be in the future',
-      });
+    if (selectedDateTime <= new Date()) {
+      return res.status(400).json({ message: 'New appointment time must be in the future' });
     }
 
     // Find and validate the appointment
@@ -483,7 +467,6 @@ console.log("User:", req.user);
       });
     }
 
-    console.log("Fetched appointment:", appointment);
 
     // Check if the new slot is available
     const conflictingAppointment = await Appointment.findOne({
@@ -506,13 +489,7 @@ console.log("User:", req.user);
     appointment.status = 'Confirmed'; // Reset to confirmed
     await appointment.save();
 
-    console.log("Updated appointment successfully");
-
-    // const email = req.user?.email || req.patient?.email;
-
-    // Send notification to the patient
     await sendNotification(
-      // email,
       req.user?.email || req.patient?.email,
       'Appointment Rescheduled',
       `Your appointment with Dr. ${appointment.doctorId.fullName} has been rescheduled to ${newDate} at ${newTime}`
@@ -524,10 +501,6 @@ console.log("User:", req.user);
       appointment,
     });
   } catch (error) {
-    // Log error with more details
-    console.error('Reschedule Appointment Error:', error.message, error.stack);
-
-    // Send generic error message to client
     res.status(500).json({
       message: 'Internal server error. Please try again later.',
     });

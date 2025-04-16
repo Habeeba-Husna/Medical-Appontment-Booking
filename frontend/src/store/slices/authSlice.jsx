@@ -3,9 +3,9 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../api/axiosInstance';
 import Cookies from 'js-cookie';
 import { ENDPOINTS } from '../../api/endPoints';
+import { useEffect } from 'react';
 
 // Register User (Patient or Doctor)
-
 export const registerUser = createAsyncThunk(
   'auth/registerUser',
   async ({ formData, role }, { rejectWithValue }) => {
@@ -72,6 +72,7 @@ export const resetPassword = createAsyncThunk(
   }
 );
 
+
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ email, password, role }, { rejectWithValue }) => {
@@ -102,6 +103,7 @@ export const fetchCurrentUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(ENDPOINTS.AUTH.ME, { withCredentials: true });
+      console.log(response.data.user,"in auth fetch usetr")
       return response.data.user;
     } catch (error) {
       return rejectWithValue(error.response?.data || 'Failed to fetch user');

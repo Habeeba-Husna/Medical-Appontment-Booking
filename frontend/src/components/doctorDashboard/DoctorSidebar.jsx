@@ -74,3 +74,124 @@ const DoctorSidebar = ({ isOpen }) => {
 };
 
 export default DoctorSidebar;
+
+
+
+
+
+
+
+// import { useNavigate } from "react-router-dom";
+// import {
+//   Calendar,
+//   ClipboardList,
+//   FileText,
+//   Home,
+//   LogOut,
+//   MessageCircle,
+//   Settings,
+//   Users,
+//   Bell,
+//   CreditCard,
+//   Star,
+//   BookOpen,
+// } from "lucide-react";
+
+// import {
+//   Sidebar,
+//   SidebarContent,
+//   SidebarFooter,
+//   SidebarGroup,
+//   SidebarGroupContent,
+//   SidebarGroupLabel,
+//   SidebarHeader,
+//   SidebarMenu,
+//   SidebarMenuButton,
+//   SidebarMenuItem,
+// } from "@/components/ui/sidebar";
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { Button } from "@/components/ui/button";
+// import { Badge } from "@/components/ui/badge";
+// import { useAuth } from "@/contexts/auth-context";
+// import { Doctor } from "@/lib/types";
+
+// export function DoctorSidebar() {
+//   const navigate = useNavigate();
+//   const { user, logout } = useAuth();
+//   const doctor = user as Doctor;
+
+//   const handleLogout = () => {
+//     logout();
+//     navigate('/login');
+//   };
+
+//   const menuItems = [
+//     { icon: Home, title: "Dashboard", path: "/doctor-dashboard" },
+//     { icon: Calendar, title: "Appointments", path: "/doctor-dashboard/appointments" },
+//     { icon: MessageCircle, title: "Consultations", path: "/doctor-dashboard/consultations" },
+//     { icon: Users, title: "Patients", path: "/doctor-dashboard/patients" },
+//     { icon: FileText, title: "Prescriptions", path: "/doctor-dashboard/prescriptions" },
+//     { icon: BookOpen, title: "Medical Records", path: "/doctor-dashboard/records" },
+//     { icon: CreditCard, title: "Payments", path: "/doctor-dashboard/payments" },
+//     { icon: Bell, title: "Notifications", path: "/doctor-dashboard/notifications" },
+//     { icon: Settings, title: "Settings", path: "/doctor-dashboard/settings" },
+//   ];
+
+//   return (
+//     <Sidebar>
+//       <SidebarHeader className="flex flex-col items-center justify-center py-4 border-b border-sidebar-border">
+//         <Avatar className="h-16 w-16 mb-2">
+//           <AvatarImage src={doctor?.profileImage} />
+//           <AvatarFallback className="bg-primary text-primary-foreground">
+//             {doctor?.name?.charAt(0) || 'D'}
+//           </AvatarFallback>
+//         </Avatar>
+//         <div className="text-center">
+//           <h3 className="font-medium">{doctor?.name}</h3>
+//           <p className="text-xs text-muted-foreground">{doctor?.specialization}</p>
+//           <div className="flex items-center justify-center gap-1 mt-1">
+//             <Star className="fill-warning text-warning h-3 w-3" />
+//             <span className="text-xs">{doctor?.rating || 5.0}</span>
+//           </div>
+//         </div>
+//       </SidebarHeader>
+
+//       <SidebarContent>
+//         <SidebarGroup>
+//           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+//           <SidebarGroupContent>
+//             <SidebarMenu>
+//               {menuItems.map((item) => (
+//                 <SidebarMenuItem key={item.path}>
+//                   <SidebarMenuButton 
+//                     asChild
+//                     tooltip={item.title}
+//                   >
+//                     <a 
+//                       href={item.path}
+//                       className="flex items-center gap-3"
+//                     >
+//                       <item.icon className="size-4" />
+//                       <span>{item.title}</span>
+//                     </a>
+//                   </SidebarMenuButton>
+//                 </SidebarMenuItem>
+//               ))}
+//             </SidebarMenu>
+//           </SidebarGroupContent>
+//         </SidebarGroup>
+//       </SidebarContent>
+
+//       <SidebarFooter className="border-t border-sidebar-border p-4">
+//         <Button 
+//           variant="outline" 
+//           className="w-full flex items-center gap-2" 
+//           onClick={handleLogout}
+//         >
+//           <LogOut className="size-4" />
+//           <span>Sign Out</span>
+//         </Button>
+//       </SidebarFooter>
+//     </Sidebar>
+//   );
+// }

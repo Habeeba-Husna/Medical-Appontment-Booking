@@ -207,47 +207,101 @@ const Login = () => {
     e.preventDefault();
     setError('');
   
+    // Validation check
     if (!email || !password) {
       setError('Both fields are required.');
       return;
     }
   
-
+    try {
+      let response;
+      console.log(role, "role");
   
-  try {
-    let response;
-    if (role === 'Admin') {
-      response = await dispatch(adminLogin({ email, password })).unwrap();
-    } else {
-      response = await dispatch(loginUser({ email, password, role })).unwrap();
-    }
-
-      // // Save the access token and role in cookies after successful login
-      // Cookies.set('accessToken', response.accessToken, {
-      //   expires: 1, // 1 day expiration
-      //   secure: true, // Only sent over HTTPS
-      //   sameSite: 'Strict',
-      // });
-      // Cookies.set('userRole', role, {
-      //   expires: 1,
-      //   secure: true,
-      //   sameSite: 'Strict',
-      // });
-
-      
+      // Depending on the role, either admin login or user login
+      if (role === 'Admin') {
+        response = await dispatch(adminLogin({ email, password })).unwrap();
+      } else {
+        response = await dispatch(loginUser({ email, password, role })).unwrap();
+        console.log(response);
+      }
+  
+      // Save the access token and role in cookies after successful login
+      Cookies.set('accessToken', response.accessToken, {
+        expires: 1, // 1 day expiration
+        secure: true, // Only sent over HTTPS
+        sameSite: 'Strict',
+      });
+      Cookies.set('userRole', role, {
+        expires: 1,
+        secure: true,
+        sameSite: 'Strict',
+      });
+  
       // Redirect user based on role
       if (role === 'Admin') {
         navigate('/dashboard3');
       } else if (role === 'Doctor') {
         navigate('/dashboard2');
       } else {
-        navigate('/dashboard1');
+        navigate("/dashboard1");
       }
-
+  
     } catch (err) {
+      // Handling any login errors
       setError(loginError || 'Login failed. Please check your credentials and try again.');
     }
   };
+  
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setError('');
+  
+  //   if (!email || !password) {
+  //     setError('Both fields are required.');
+  //     return;
+  //   }
+  
+
+  
+  // try {
+  //   let response;
+  //   console.log(role,"role")
+  //   if (role === 'Admin') {
+  //     response = await dispatch(adminLogin({ email, password })).unwrap();
+  //   } else {
+  //     response = await dispatch(loginUser({ email, password, role })).unwrap();
+  //     console.log(response)
+  //   }
+
+  //     // // Save the access token and role in cookies after successful login
+  //     // Cookies.set('accessToken', response.accessToken, {
+  //     //   expires: 1, // 1 day expiration
+  //     //   secure: true, // Only sent over HTTPS
+  //     //   sameSite: 'Strict',
+  //     // });
+  //     // Cookies.set('userRole', role, {
+  //     //   expires: 1,
+  //     //   secure: true,
+  //     //   sameSite: 'Strict',
+  //     // });
+
+      
+  //     // Redirect user based on role
+  //     if (role === 'Admin') {
+  //       navigate('/dashboard3');
+  //     } else if (role === 'Doctor') {
+  //       navigate('/dashboard2');
+  //     } else {
+  //       console.log("cvbn cvbn cvbnm vbnm ..........'''''''''")
+  //       navigate("/dashboard1");
+  //       console.log(".........")
+  //     }
+
+  //   } catch (err) {
+  //     setError(loginError || 'Login failed. Please check your credentials and try again.');
+  //   }
+  // };
    
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">

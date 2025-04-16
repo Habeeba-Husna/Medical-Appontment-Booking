@@ -50,13 +50,21 @@ const AppointmentsPage = () => {
     app.status && 
     !['completed', 'cancelled'].includes(app.status.toLowerCase())
   );
+  console.log('All upcomingAppointments:', upcomingAppointments);
 
-  const futureAppointments = upcomingAppointments.filter(app => 
-    app && 
-    !isToday(app.date) && 
-    app.status && 
-    !['completed', 'cancelled'].includes(app.status.toLowerCase())
-  );
+
+  const futureAppointments = upcomingAppointments.filter(app => {
+
+    const appDate = new Date(app.date); 
+    return (
+      app &&
+      !isToday(appDate) &&
+      app.status &&
+      !['completed', 'cancelled'].includes(app.status.toLowerCase())
+    );
+  });
+  console.log('Filtered futureAppointments:', futureAppointments);
+  
   
   const formatDate = (dateString) => {
     if (!dateString) return 'Date not available';
@@ -281,12 +289,12 @@ if (status === 'failed') {
                 </>
               )}
 
-              {upcomingAppointments.length > 0 && (
+              {futureAppointments.length > 0 && (
                 <>
                   <div className="flex items-center gap-2 text-gray-800 text-lg font-semibold mt-6">
                     <Calendar className="w-5 h-5" /> <span>Upcoming Appointments</span>
                   </div>
-                  {upcomingAppointments.map((appointment) =>
+                  {futureAppointments.map((appointment) =>
                     renderAppointmentCard(appointment)
                   )}
                 </>

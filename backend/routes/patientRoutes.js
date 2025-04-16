@@ -193,7 +193,7 @@
 
 
 
-
+import upload from '../middleware/uploadMulter.js';
 import express from 'express';
 import {getAllDoctors,getDoctorById,getSingleDoctorWithDetails} from '../controllers/doctorController.js';
 import { authenticate } from '../middleware/authMiddleware.js';
@@ -207,31 +207,52 @@ import {
 } from '../controllers/patientController.js';
 // import upload from '../config/cloudinaryConfig.js';
 import { getPatientProfile,updatePatientProfile,uploadProfilePhoto  } from '../controllers/patientController.js';
-import { localUpload } from '../config/cloudinaryPhoto.js';
+// import { localUpload } from '../config/cloudinaryPhoto.js';
 
 const router = express.Router();
 
 router.get('/doctors',authenticate,authorizeRoles('patient'), getAllDoctors);
-router.get('/:id',authenticate,authorizeRoles('patient'), getDoctorById);
-router.get('/:id/details',authenticate,authorizeRoles('patient'), getSingleDoctorWithDetails);
-
-router.get('/notifications',authenticate,authorizeRoles('patient'), getNotifications);
-
 router.get('/profile', authenticate, authorizeRoles('patient'), getPatientProfile);
 router.put('/profile/update', authenticate, authorizeRoles('patient'), updatePatientProfile);
-router.post('/upload-profile-photo', 
-  authenticate, 
-  authorizeRoles('patient'),
-  localUpload.single('profilePhoto'), 
+router.patch(
+  '/upload-profile-photo',
+  authenticate,
+  (req, res, next) => {
+      const uploadMiddleware = upload("patients");
+      uploadMiddleware.single("profilePhoto")(req, res, next);
+  },
   uploadProfilePhoto
 );
-// router.route('/profile/photo').put(authenticate, upload.single('photo'), updatePatientPhoto);
+router.get('/notifications',authenticate,authorizeRoles('patient'), getNotifications);
+
+router.get('/:id/details',authenticate,authorizeRoles('patient'), getSingleDoctorWithDetails);
+router.get('/:id',authenticate,authorizeRoles('patient'), getDoctorById);
+
+
+
+
+
+
 
 
 
 export default router;
 
-
+// router.patch('/upload-profile-photo', 
+//   authenticate, 
+//   authorizeRoles('patient'),
+//   localUpload.single('profilePhoto'), 
+//   uploadProfilePhoto
+// );
+// router.route('/profile/photo').put(authenticate, upload.single('photo'), updatePatientPhoto);
+// import cloudinaryUpload from '../middlewares/cloudinaryMulter.js';
+// router.patch(
+//   '/update-profile',
+//   authenticate,
+//   authorizeRoles('patient'),
+//   cloudinaryUpload.single('profilePhoto'), // handle optional image upload
+//   updatePatientProfile
+// );
 
 
 
