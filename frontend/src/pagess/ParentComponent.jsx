@@ -1,20 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { unwrapResult } from '@reduxjs/toolkit';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate ,useParams } from 'react-router-dom';
 import { startPrivateChat, fetchDoctorById, setActiveChat, setOnlineUsers, updateUserStatus } from '../store/slices/chatSlice.js'
 import { getSocket } from '../socket/socket';
+import { useSocket } from '../hooks/useSocket.js';
 import ChatUI from './ChatUI';
 import { toast } from 'react-toastify';
 
 const ParentComponent = ({ user, doctorId }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { doctorId } = useParams();
+  const { user } = useSelector((state) => state.auth);
   const [doctorData, setDoctorData] = useState(null);
   const [messages, setMessages] = useState([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [isCreatingChat, setIsCreatingChat] = useState(false);
   const [onlineUsers, setOnlineUsersState] = useState([]);
+
+  const { isConnected } = useSocket(user?._id, doctorId);
+  const socket = getSocket();
+
+
+  // Early return if no user
+  if (!user || !user._id) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-red-500">Please login to access the chat</p>
+      </div>
+    );
+  }
+
 
   // Fetch doctor data if not available
   useEffect(() => {
@@ -24,9 +41,9 @@ const ParentComponent = ({ user, doctorId }) => {
           setMessagesLoading(true);
           const result = await dispatch(fetchDoctorById(doctorId));
           setDoctorData(result.payload);
-          setMessagesLoading(false);
         } catch (err) {
           toast.error(err.message);
+        } finally {
           setMessagesLoading(false);
         }
       }
@@ -34,44 +51,36 @@ const ParentComponent = ({ user, doctorId }) => {
     fetchDoctor();
   }, [doctorId, doctorData, dispatch]);
 
-  // Socket connection for online status and user updates
-  useEffect(() => {
-    const socket = getSocket();
-    // if (!socket) return;
-    if (!socket || !doctorId || !user?._id) return;
-    
-    if (user?._id) {
-      socket.emit("userOnline", user._id);
+ // Socket connection for online status and user updates
+ useEffect(() => {
+  if (!socket || !doctorId || !user?._id) return;
+  
+  if (user?._id) {
+    socket.emit("userOnline", user._id);
+  }
+  
+  socket.on("onlineUsers", (users) => {
+    setOnlineUsersState(users);
+    dispatch(setOnlineUsers(users));
+  });
+  
+  socket.on("userStatusUpdate", ({ userId, isOnline }) => {
+    dispatch(updateUserStatus({ userId, isOnline }));
+  });
+
+  socket.on("newMessage", (message) => {
+    if (message.chatId === doctorId) {
+      setMessages(prev => [...prev, message]);
     }
-    
-    socket.on("onlineUsers", (users) => {
-      setOnlineUsersState(users);
-      dispatch(setOnlineUsers(users));
-    });
-    
-    socket.on("userStatusUpdate", ({ userId, isOnline }) => {
-      dispatch(updateUserStatus({ userId, isOnline }));
-    });
+  });
 
-    socket.on("newMessage", (message) => {
-      if (message.chatId === doctorId) {
-        setMessages(prev => [...prev, message]);
-      }
-    });
+  return () => {
+    socket.off("userStatusUpdate");
+    socket.off("onlineUsers");
+    socket.off("newMessage");
+  };
+}, [dispatch, user?._id, doctorId, socket]);
 
-    socket.on("connect", () => {
-      if (doctorId) {
-        socket.emit("joinChat", { chatId: doctorId, userId: user._id });
-      }
-    });
-
-    return () => {
-      socket.off("userStatusUpdate");
-      socket.off("onlineUsers");
-      socket.off("newMessage");
-      socket.off("connect");
-    };
-  }, [dispatch, user?._id, doctorId]);
 
   // Handle start chat logic
   const startChat = async () => {
@@ -79,16 +88,18 @@ const ParentComponent = ({ user, doctorId }) => {
     setIsCreatingChat(true);
 
     try {
-      const result = await dispatch(startPrivateChat({ userId1: user._id, userId2: doctorId }));
+      const result = await dispatch(startPrivateChat({ 
+        userId1: user._id, 
+        userId2: doctorId 
+      }));
       const chat = unwrapResult(result);
+      
       if (chat?._id) {
         dispatch(setActiveChat(chat));
         navigate(`/chat/${doctorId}`, {
           state: { chatId: chat._id },
           replace: true,
         });
-      } else {
-        throw new Error("Chat creation failed");
       }
     } catch (error) {
       toast.error("Failed to start chat");
@@ -98,17 +109,15 @@ const ParentComponent = ({ user, doctorId }) => {
   };
 
   return (
-    <div>
-      <ChatUI
-        user={user}
-        doctorId={doctorId}
-        doctorData={doctorData}
-        messages={messages}
-        messagesLoading={messagesLoading}
-        onlineUsers={onlineUsers}
-        startChat={startChat}
-      />
-    </div>
+    <ChatUI
+      doctorId={doctorId}
+      doctorData={doctorData}
+      messages={messages}
+      messagesLoading={messagesLoading}
+      onlineUsers={onlineUsers}
+      startChat={startChat}
+      isConnected={isConnected}
+    />
   );
 };
 

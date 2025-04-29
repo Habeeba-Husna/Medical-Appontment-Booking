@@ -2,8 +2,13 @@ export const setupChatSocket = (io) => {
   const onlineUsers = new Map();
 
   io.on("connection", (socket) => {
-    console.log("New client connected:", socket.id);
+    console.log("New client connected:", socket.id, "with auth:", socket.handshake.auth);
 
+    socket.on("error", (err) => {
+      console.error("Socket error:", err);
+    });
+
+    
     // Handle user coming online
     socket.on("userOnline", (userId) => {
       if (!userId) return;

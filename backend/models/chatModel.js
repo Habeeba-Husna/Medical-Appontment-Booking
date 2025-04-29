@@ -16,7 +16,7 @@ const chatSchema = new mongoose.Schema({
   memberModel: {
     type: String,
     required: true,
-    enum: ['Patient', 'Doctor'] // Only allow these models
+    enum: ['Patient', 'Doctor'] 
   },
   lastMessage: {
     type: mongoose.Schema.Types.ObjectId,
