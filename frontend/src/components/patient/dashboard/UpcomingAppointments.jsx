@@ -44,7 +44,7 @@ const UpcomingAppointments = () => {
   const handleViewDetails = (appointmentId) => {
     dispatch(selectAppointment(appointmentId));
     // navigate(`/appointments/${appointmentId}`);
-    navigate("/appointments");
+    navigate("/patient/appointments");
   };
 
   const handleCancelAppointment = async (appointmentId) => {
@@ -65,7 +65,7 @@ const UpcomingAppointments = () => {
         </CardHeader>
         <CardContent className="text-center py-8">
           <p className="mb-4 text-gray-500">No appointments scheduled yet.</p>
-          <Button onClick={() => navigate('/doctors')} className="bg-medical-primary hover:bg-medical-secondary">
+          <Button onClick={() => navigate('/patient/doctors')} className="bg-medical-primary hover:bg-medical-secondary">
             Book an Appointment
           </Button>
         </CardContent>
@@ -126,7 +126,7 @@ const UpcomingAppointments = () => {
         ))}
       </CardContent>
       <CardFooter>
-        <Button onClick={() => navigate('/appointments')} variant="outline" className="w-full">
+        <Button onClick={() => navigate('/patient/appointments')} variant="outline" className="w-full">
           View All Appointments
         </Button>
       </CardFooter>

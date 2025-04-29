@@ -427,7 +427,7 @@ const ProfilePage  = ({ profile }) => {
 
 
   useEffect(() => {
-    // First, try to load from localStorage
+    
     const storedUser = localStorage.getItem('user');
   if (storedUser) {
     setUser(JSON.parse(storedUser));
@@ -439,8 +439,8 @@ const ProfilePage  = ({ profile }) => {
           withCredentials: true,
         });
         setUser(res.data);
-           //  Store user temporarily on frontend (not for auth)
-      localStorage.setItem('user', JSON.stringify(res.data));
+           
+      localStorage.setItem('user', JSON.stringify(res.data));   //  user ne temporarily store frontend (not for auth)
       
       } catch (err) {
         console.error("Error fetching profile", err);
@@ -451,19 +451,19 @@ const ProfilePage  = ({ profile }) => {
   }, []);
 
 
-  const getFullPhotoUrl = (photoPath) => {
-    if (!photoPath) return '';
-    return photoPath.startsWith('http')
-      ? photoPath
-      : `http://localhost:5000/${photoPath.replace(/\\/g, '/')}`;
-  };
+  // const getFullPhotoUrl = (photoPath) => {
+  //   if (!photoPath) return '';
+  //   return photoPath.startsWith('http')
+  //     ? photoPath
+  //     : `http://localhost:5000/${photoPath.replace(/\\/g, '/')}`;
+  // };
   
 
-    // Function to fetch updated profile
+    
     const fetchUpdatedProfile = async () => {
       try {
         const response = await axiosInstance.get('/patient/profile', { withCredentials: true });
-        setUser(response.data);  // Update profile state with new data
+        setUser(response.data);  // profile state new data vech update 
       } catch (error) {
         console.error('Failed to fetch updated profile', error);
       }
@@ -489,8 +489,8 @@ const ProfilePage  = ({ profile }) => {
     formData.append('profilePhoto', file);
   
     try {
-      // Show temporary preview
-      setTempPhoto(URL.createObjectURL(file));
+     
+      setTempPhoto(URL.createObjectURL(file));   // Show temporary preview
   
       const response = await axiosInstance.patch(
         '/patient/upload-profile-photo',
@@ -536,8 +536,8 @@ const ProfilePage  = ({ profile }) => {
 
   const handleSave = () => {
     console.log("Saving data:", formData);
-    // Implement save logic here
-    setIsEditing(false);
+    
+    setIsEditing(false);       
   };
 
   const getInitials = (name = "") => {
@@ -580,9 +580,9 @@ const ProfilePage  = ({ profile }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8">
-        {/* Left Sidebar */}
+       
         <div className="space-y-6">
-          {/* Profile Card */}
+     
           <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-white">
             <CardContent className="p-6 flex flex-col items-center text-center">
               <div className="relative mb-4 group">
@@ -601,7 +601,7 @@ const ProfilePage  = ({ profile }) => {
 //   className="w-32 h-32 rounded-full object-cover"
 // />
 <img
-  src={user?.profilePhoto || '/default-avatar.png ||defaultProfileImage'}  // Fallback to default image
+  src={user?.profilePhoto || '/default-avatar.png ||defaultProfileImage'}  
   alt="Profile"
   className="w-32 h-32 rounded-full object-cover"
 />
@@ -652,7 +652,7 @@ const ProfilePage  = ({ profile }) => {
             </CardContent>
           </Card>
 
-          {/* upcoming appointment */}
+       
           <Card className="border-0 shadow-sm">
   <CardHeader className="border-b pb-4">
     <h3 className="text-lg font-semibold">Upcoming Appointments</h3>
@@ -675,7 +675,7 @@ const ProfilePage  = ({ profile }) => {
 </Card>
         </div>
 
-        {/* Right Tabs Content */}
+       
         <div>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3 mb-6 bg-gray-100 p-1 rounded-lg">

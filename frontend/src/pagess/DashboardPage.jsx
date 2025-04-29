@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 
 const DashboardPage = () => {
   const user  = useAppSelector((state) =>state.auth.user);
+  
   console.log("dashboard top use........",user)
 
   return (

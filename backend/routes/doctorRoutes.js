@@ -17,27 +17,15 @@
 
 
 import express from 'express';
-// import {
-//   getDoctorProfile,
-//   updateDoctorProfile
-// } from '../controllers/doctorController.js';
+import {getDoctorById} from '../controllers/doctorController.js';
+import { authenticate } from '../middleware/authMiddleware.js';
+// import { authorizeRoles } from '../middleware/authorizeRoles.js';
 
-import {
-  // verifyToken,
-  // authenticateDoctor
-} from '../middleware/authMiddleware.js';
 
 const router = express.Router();
-
-// router.use(verifyToken, authenticateDoctor); //  Apply to all routes
-
-// router.get('/profile', getDoctorProfile);
-// router.put('/profile', updateDoctorProfile);
-
-// router.get("/profile", getCurrentDoctorProfile);
-// router.get('/approved', getApprovedDoctors);
-// Then dynamic one
-router.get("/:id", getDoctorProfileById);
+router.get('/:id',authenticate, getDoctorById);
+// router.get('/:id/details',authenticate, getSingleDoctorWithDetails);
+// router.get("/:id", getDoctorProfileById);
 
 
 export default router;

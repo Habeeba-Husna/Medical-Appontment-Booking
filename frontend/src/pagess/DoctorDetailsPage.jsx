@@ -232,14 +232,14 @@ const DoctorDetailsPage = () => {
           <div className="mt-8 flex flex-col sm:flex-row gap-4">
             <button
               className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition shadow-md"
-              onClick={() => navigate(`/book-appointment/${doctor._id}`)}
+              onClick={() => navigate(`/patient/book-appointment/${doctor._id}`)}
             >
               Book Appointment
             </button>
             <button
               // className="bg-white border border-gray-400 text-gray-800 font-medium px-6 py-3 rounded-lg hover:bg-gray-100 hover:text-blue-700 transition shadow-sm"
               className="bg-gray-300 text-gray-800 font-medium px-6 py-3 rounded-lg transition duration-200 hover:bg-gray-600 hover:text-white"
-              onClick={() => navigate('/doctors')}
+              onClick={() => navigate('/patient/doctors')}
             >
               ← Back to Doctors
             </button>

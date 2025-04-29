@@ -90,7 +90,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchDoctors } from '../../store/slices/doctorSlice';
 import DoctorCard from './DoctorCard';
-
+import { Search, Filter } from 'lucide-react';
 import { Input } from '../ui/Input';
 import {
   Select,
@@ -99,8 +99,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/Select';
-
-import { Search, Filter } from 'lucide-react';
 
 const DoctorList = () => {
   const dispatch = useDispatch();
@@ -114,7 +112,6 @@ const DoctorList = () => {
     console.log(doctors," bf doctorlist pagw")
     dispatch(fetchDoctors());
     console.log(doctors," af doctorlist pagw")
-
   }, [dispatch]);
 
   const filteredDoctors = doctors.filter((doc) => {
@@ -146,9 +143,6 @@ const DoctorList = () => {
             className="pl-12 pr-4 py-2 border rounded w-full text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
-
-        {/* Specialization Filter with icon */}
-         {/* Specialization Filter with icon */}
   <div className="relative w-full md:w-1/3">
     <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
     <select

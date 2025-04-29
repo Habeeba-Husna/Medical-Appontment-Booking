@@ -3,67 +3,6 @@ import axiosInstance from '../../api/axiosInstance';
 import { ENDPOINTS } from '../../api/endPoints';
 import Cookies from 'js-cookie';
 
-
-
-// Fetch all doctors
-
-export const fetchDoctors = createAsyncThunk(
-  'doctors/fetchDoctors',
-  async (_, thunkAPI) => {
-    console.log("in doctor redux page .....")
-   try {
-//       // const response = await axiosInstance.get('/patient/doctors');
-//       const token = Cookies.get('token');
-// if (!token) return thunkAPI.rejectWithValue('No token found in cookies');
-
-const response = await axiosInstance.get(ENDPOINTS.PATIENT.DOCTORS);
-    console.log(response.data,"responce of doctor list,,,,,,,,,,,,,,")
-      return response.data;
-      
-    } catch (error) {
-      if (error.response?.status === 401) {
-        try {
-          await thunkAPI.dispatch(refreshToken());
-          const retryResponse = await axiosInstance.get('/patient/doctors');
-          return retryResponse.data;
-        } catch (refreshError) {
-          return thunkAPI.rejectWithValue('Session expired. Please login again.');
-        }
-      }
-      return thunkAPI.rejectWithValue(error.response?.data || error.message);
-    }
-  }
-);
-
-
-// single doctor by ID
-export const fetchDoctorById = createAsyncThunk(
-  'doctors/fetchDoctorById',
-  async (doctorId, thunkAPI) => {
-    try {
-      // const token = Cookies.get('token');
-      // console.log(token)
-      // if (!token) {
-      //   return thunkAPI.rejectWithValue('Access token is missing');
-      // }
-console.log("cvbnm............")
-      const response = await axiosInstance.get(ENDPOINTS.PATIENT.SINGLE_DOCTOR(doctorId)
-      // {
-      //   headers: {
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      // }
-    );
-      // const response = await axiosInstance.get('/api/patient/:id');
-
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data || 'An unexpected error occurred');
-    }
-  }
-);
-
-
 export const refreshToken = createAsyncThunk(
   'auth/refreshToken',
   async (_, thunkAPI) => {
@@ -74,12 +13,10 @@ export const refreshToken = createAsyncThunk(
         return thunkAPI.rejectWithValue('Refresh token is missing');
       }
 
-      // Make API call to refresh access token
-      // const response = await axiosInstance.post('/auth/refresh', { refreshToken });
-      const response = await axiosInstance.post('/auth/refresh', { refreshToken: Cookies.get('refreshToken') });
+      const response = await axiosInstance.post('/auth/refresh-token', { refreshToken});
       // Set the new access token in cookies
       const { accessToken } = response.data;
-      Cookies.set('token', accessToken, { expires: 1, secure: true, sameSite: 'Strict' });
+      Cookies.set('accessToken', accessToken, { expires: 1, secure: true, sameSite: 'Strict' });
 
       return accessToken;
     } catch (error) {
@@ -88,8 +25,43 @@ export const refreshToken = createAsyncThunk(
   }
 );
 
+export const fetchDoctors = createAsyncThunk(
+  'doctors/fetchDoctors',
+  async (_, thunkAPI) => {
+   try {
+const response = await axiosInstance.get(ENDPOINTS.PATIENT.DOCTORS);
+    console.log(response.data,"responce of doctor list,,,,,,,,,,,,,,")
+      return response.data;
+      
+    } catch (error) {
+      if (error.response?.status === 401) {
+        try {
+          await thunkAPI.dispatch(refreshToken());
+          const retryResponse = await axiosInstance.get(ENDPOINTS.PATIENT.DOCTORS);
+          return retryResponse.data;
+        } catch (refreshError) {
+          return thunkAPI.rejectWithValue('Session expired. Please login again.');
+        }
+      }
+      return thunkAPI.rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
 
+export const fetchDoctorById = createAsyncThunk(
+  'doctors/fetchDoctorById',
+  async (doctorId, thunkAPI) => {
+    try {
+console.log("cvbnm............")
+      const response = await axiosInstance.get(ENDPOINTS.DOCTOR.SINGLE_DOCTOR);
+      console.log('Calling API:', ENDPOINTS.PATIENT.SINGLE_DOCTOR(doctorId));
 
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || 'An unexpected error occurred');
+    }
+  }
+);
 
 const initialState = {
   list: [],              // All doctors
@@ -109,8 +81,6 @@ const doctorSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-
-      //Fetch All Doctors
       .addCase(fetchDoctors.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -123,8 +93,6 @@ const doctorSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      //fetch Single Doctor
       .addCase(fetchDoctorById.pending, (state) => {
         state.isSingleDoctorLoading = true;
         state.error = null;
@@ -137,15 +105,12 @@ const doctorSlice = createSlice({
         state.isSingleDoctorLoading = false;
         state.error = action.payload;
       })
-      
-      //Refresh Token
       .addCase(refreshToken.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(refreshToken.fulfilled, (state, action) => {
+      .addCase(refreshToken.fulfilled, (state) => {
         state.loading = false;
-        // Optionally, update state or notify the user of successful token refresh
       })
       .addCase(refreshToken.rejected, (state, action) => {
         state.loading = false;

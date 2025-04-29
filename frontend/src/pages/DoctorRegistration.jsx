@@ -3,8 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../store/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 
-
-
 const DoctorRegistration = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -21,18 +19,6 @@ const DoctorRegistration = () => {
     clinicDetails: "",
     documents: null,
   });
-
-  // const [errors, setErrors] = useState({
-  //   fullName: "",
-  //   email: "",
-  //   phoneNumber: "",
-  //   password: "",
-  //   specialization: "",
-  //   experience: "",
-  //   qualifications: "",
-  //   clinicDetails: "",
-  //   documents: "",
-  // });
 
   const [errors, setErrors] = useState({});
 
@@ -68,19 +54,6 @@ const DoctorRegistration = () => {
   const validateForm = () => {
     const newErrors = {};
     let isValid = true;
-
-    // Check required fields
-    // Object.keys(formData).forEach(key => {
-    //   if (!formData[key] && key !== "documents") {
-    //     newErrors[key] = "Required";
-    //     isValid = false;
-    //   }
-    // });
-     // Special validation for documents (optional here)
-    //  if (!formData.documents) {
-    //   newErrors.documents = "Please upload verification documents";
-    //   isValid = false;
-    // }
 
     Object.keys(formData).forEach((key) => {
       if (!formData[key] && key !== "documents") {
@@ -143,64 +116,7 @@ const DoctorRegistration = () => {
     }
   };
 
-  
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
 
-//     if (!validateForm()) return;
-    
-//     const data = new FormData();
-  
-//     // Append all regular fields
-//     // Object.entries(formData).forEach(([key, value]) => {
-//     //   if (key !== "documents") {
-//     //     data.append(key, value);
-//     //   }
-//     // });
-
-// // Append fields
-// Object.entries(formData).forEach(([key, value]) => {
-//   if (key === "documents" && value?.length > 0) {
-//     Array.from(value).forEach((file) => {
-//       data.append("documents", file); // or "documents[]" based on backend
-//     });
-//   } else {
-//     data.append(key, value);
-//   }
-// });
-  
-//     // // Append files
-//     // if (formData.documents && formData.documents.length > 0) {
-//     //   Array.from(formData.documents).forEach(file => {
-//     //     data.append("documents", file);
-//     //   });
-//     // } else {
-//     //   alert("Please upload at least one document");
-//     //   return;
-//     // }
-  
-//     try {
-//       const result = await dispatch(registerUser({ 
-//         formData: data, 
-//         role: "Doctor" 
-//       })
-//     );
-
-//       console.log(result,"result...............");
-    
-//       if (result?.type === 'auth/registerUser/fulfilled') {
-//         alert(result?.payload?.message || "Doctor registered successfully. Waiting for admin approval.");
-//         navigate("/login");
-//       } else {
-//         alert(result?.payload?.message || "Registration failed. Please try again.");
-//       }
-      
-//     } catch (error) {
-//       console.error("Registration error:", error);
-//       alert("An error occurred during registration. Please try again.");
-//     }
-//   };
- 
   return (
     <div className="flex justify-center items-center py-12 sm:px-6 lg:px-8 min-h-screen bg-gray-100">
       <div className="mt-8 sm:w-full sm:max-w-2xl">
@@ -208,7 +124,11 @@ const DoctorRegistration = () => {
           <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">
             Doctor Registration
           </h2>
-          {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+
+          {typeof error === "string" && (
+      <p className="text-red-500 text-center mb-4">{error}</p>
+    )}
+          {/* {error && <p className="text-red-500 text-center mb-4">{String(error)}</p>} */}
 
           {/* <form onSubmit={handleSubmit} encType="multipart/form-data"> */}
 

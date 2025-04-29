@@ -1,29 +1,61 @@
+// ProtectedRoute.jsx
+// import { useAppSelector } from '../hooks'; // Make sure this path is correct
+// import { Navigate } from 'react-router-dom';
 
-import React from 'react';
-import { Navigate } from 'react-router-dom';
+// const ProtectedRoute = ({ children, allowedRoles }) => {
+//   const { isAuthenticated, user } = useAppSelector(state => state.auth);
+  
+//   if (!isAuthenticated) {
+//     return <Navigate to="/login" replace />;
+//   }
+
+//   if (allowedRoles && !allowedRoles.includes(user?.role)) {
+//     return <Navigate to="/unauthorized" replace />;
+//   }
+
+//   return children;
+// };
+
+// export default ProtectedRoute;
+
+
+
+import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const userRole = Cookies.get('userRole');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated, user } = useSelector(state => state.auth);
 
-  if (!userRole || !allowedRoles.includes(userRole)) {
-    return <Navigate to="/" />; // Redirect to login/home
+  useEffect(() => {
+    const token = Cookies.get('token');
+
+    // If no token and not authenticated, redirect to login
+    if (!token && !isAuthenticated) {
+      navigate('/login', {
+        state: { from: location },
+        replace: true,
+      });
+    }
+
+    // Wait until user.role is available before checking role
+    if (isAuthenticated && user?.role && allowedRoles && !allowedRoles.includes(user.role)) {
+      navigate('/unauthorized', { replace: true });
+    }
+  }, [isAuthenticated, user?.role, navigate, location, allowedRoles]);
+
+  // Wait until role is known before rendering
+  if (!user?.role && isAuthenticated) {
+    return <div>Loading...</div>; // Or a spinner
   }
 
-  return children;
+  if (isAuthenticated && (!allowedRoles || allowedRoles.includes(user?.role))) {
+    return children;
+  }
+
+  return null;
 };
-
 export default ProtectedRoute;
-
-
-// const ProtectedRoute = ({ children, role }) => {
-//   const user = // get user from state
-//   return user && user.role === role ? children : <Navigate to="/unauthorized" />;
-// };
-
-// // Usage
-// <Route path="/admin" element={
-//   <ProtectedRoute role="admin">
-//     <AdminPanel />
-//   </ProtectedRoute>
-// } />

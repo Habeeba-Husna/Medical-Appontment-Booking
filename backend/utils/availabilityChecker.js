@@ -9,7 +9,7 @@ export const checkDoctorAvailability = async (doctorId, date, time) => {
     doctorId,
     date,
     time,
-    status: { $in: ['Pending', 'Confirmed'] } // ignore cancelled appointments
+    status: { $in: ['pending', 'confirmed'] } // ignore cancelled appointments
   });
 
   // If found, doctor is not available

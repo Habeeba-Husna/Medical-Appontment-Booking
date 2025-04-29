@@ -23,7 +23,7 @@ const Hero = () => {
             </button>
             <button 
               className="border border-blue-600 text-blue-600 px-6 py-2 text-sm rounded-lg"
-              onClick={() => navigate('/doctors')}
+              onClick={() => navigate('/login')}
             >
               Join as Doctor
             </button>

@@ -22,44 +22,6 @@
 //     });
 //     failedQueue = [];
 // };
-// // axiosInstance.interceptors.response.use(
-// //   (response) => response,
-// //   async (error) => {
-// //       const originalRequest = error.config;
-// //     console.log("in axis instance..............")
-// //     console.log(error.response,"error mdg in access tokren")
-// //       // Handle 401 errors for expired tokens
-// //       if (error.response && error.response.status === 401){
-// //           if (isRefreshing) {
-// //               return new Promise((resolve, reject) => {
-// //                   failedQueue.push({ resolve, reject });
-// //               });
-// //           }
-
-// //           originalRequest._retry = true;
-// //           isRefreshing = true;
-// //           console.log("before instance api call")
-// //           try {
-// //               await axiosInstance.post("/auth/refreshtoken");
-
-// //               // Retry the original request after refreshing the token
-// //               isRefreshing = false;
-// //               return axiosInstance(originalRequest);
-// //           } catch (refreshError) {
-// //               isRefreshing = false;
-// //               processQueue(refreshError, null);
-
-// //               // Redirect to login if refresh fails
-// //               if (refreshError.response?.status === 401) {
-// //                   window.location.href = "/login";
-// //               }
-// //               return Promise.reject(refreshError);
-// //           }
-// //       }
-
-// //       return Promise.reject(error);
-// //   }
-// // );
 
 // axiosInstance.interceptors.response.use(
 //     (response) => response,
@@ -105,7 +67,9 @@
 //   );
 
 
+
 import axios from "axios";
+import { logoutUser } from "../store/slices/authSlice";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
@@ -130,48 +94,81 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
+// axiosInstance.interceptors.response.use(
+//   (response) => response,
+//   async (error) => {
+//     const originalRequest = error.config;
+
+//     // Skip retrying if already retried once
+//     if (error.response?.status === 401 && !originalRequest._retry) {
+//       if (isRefreshing) {
+//         return new Promise((resolve, reject) => {
+//           failedQueue.push({ resolve, reject });
+//         })
+//           .then(() => axiosInstance(originalRequest))
+//           .catch(err => Promise.reject(err));
+//       }
+
+//       originalRequest._retry = true;
+//       isRefreshing = true;
+
+//       try {
+//         const res = await axiosInstance.post("/auth/refreshtoken");
+
+//         // Optionally update your auth store with the new token
+//         // e.g. dispatch(updateAccessToken(res.data.accessToken));
+
+//         isRefreshing = false;
+//         processQueue(null, res.data.accessToken);
+
+//         return axiosInstance(originalRequest);
+//       } catch (refreshError) {
+//         isRefreshing = false;
+//         processQueue(refreshError, null);
+
+//         // Optional: use router or state-based redirect
+//         // Avoid hard reload to prevent rerenders
+//         router.push("/login"); // if using React Router
+//         return Promise.reject(refreshError);
+//       }
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
+
 axiosInstance.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     const originalRequest = error.config;
-
-    // Skip retrying if already retried once
+    
+    // If 401 and not a retry attempt
     if (error.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then(() => axiosInstance(originalRequest))
-          .catch(err => Promise.reject(err));
-      }
-
       originalRequest._retry = true;
-      isRefreshing = true;
-
+      
       try {
-        const res = await axiosInstance.post("/auth/refreshtoken");
-
-        // Optionally update your auth store with the new token
-        // e.g. dispatch(updateAccessToken(res.data.accessToken));
-
-        isRefreshing = false;
-        processQueue(null, res.data.accessToken);
-
+        const { data } = await axiosInstance.post('/auth/refreshtoken');
+        // const refreshToken = Cookies.get('refreshToken');
+        // if (!refreshToken) throw new Error('No refresh token');
+        
+        // const response = await axios.post('/api/auth/refresh-token', { refreshToken });
+        // const { accessToken } = response.data;
+        
+        // Cookies.set('token', accessToken);
+        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+        
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        isRefreshing = false;
-        processQueue(refreshError, null);
-
-        // Optional: use router or state-based redirect
-        // Avoid hard reload to prevent rerenders
-        router.push("/login"); // if using React Router
+        // If refresh fails, logout user
+        store.dispatch(logoutUser());
+        window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }
-
+    
     return Promise.reject(error);
   }
 );
 
-
 export default axiosInstance;
+

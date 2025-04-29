@@ -68,13 +68,13 @@ title={`Rated ${doctor.rating || 'N/A'} by ${doctor.totalRatings || 0} users`}
             <Button
               variant="outline"
               className="w-full sm:w-auto border-blue-800 text-blue-800 hover:bg-sky-200 hover:text-black"
-              onClick={() => navigate(`/doctors/${doctor._id}`)} 
+              onClick={() => navigate(`/patient/doctors/${doctor._id}`)} 
             >
               View Profile
             </Button>
             <Button
               className="w-full sm:w-auto bg-sky-400 text-white hover:bg-blue-800"
-              onClick={() => navigate(`/book-appointment/${doctor._id}`)}
+              onClick={() => navigate(`/patient/book-appointment/${doctor._id}`)}
             >
               Book Appointment
             </Button>

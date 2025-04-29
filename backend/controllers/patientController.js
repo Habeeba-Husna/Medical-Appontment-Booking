@@ -132,53 +132,6 @@ export const uploadProfilePhoto = async (req, res) => {
   }
 };
 
-
-// export const uploadProfilePhoto = async (req, res) => {
-//   console.log('Upload profile photo route hit');
-//   try {
-//     console.log("image edit in controller,...........")
-//     // Use req.user instead of req.patient since that's what authenticate sets
-//     if (!req.user || !req.user.id) {
-//       return res.status(401).json({ message: 'Not authenticated' });
-//     }
-
-//     if (!req.file) {
-//       return res.status(400).json({ message: 'No file uploaded' });
-//     }
-    
-
-//     const updatedPatient = await Patient.findByIdAndUpdate(
-//       req.user.id, // Changed from req.patient._id
-//       { profilePhoto: req.file.path },
-//       { new: true }
-//     ).select('-password');
-//     console.log(updatedPatient,"updatedPatient..........")
-//     if (!updatedPatient) {
-//       return res.status(404).json({ message: 'Patient not found' });
-//     }
-
-//     res.status(200).json({
-//       message: 'Profile photo uploaded successfully',
-//       profilePhoto: updatedPatient.profilePhoto,
-//     });
-//   } catch (error) {
-//     console.error('Error uploading profile photo:', error);
-    
-//     if (req.file?.path) {
-//       try {
-//         await cloudinary.uploader.destroy(req.file.filename);
-//       } catch (cleanupError) {
-//         console.error('Error cleaning up file:', cleanupError);
-//       }
-//     }
-    
-//     res.status(500).json({ 
-//       message: 'Failed to upload profile photo',
-//       error: error.message 
-//     });
-//   }
-// };
-
 // Get all patients (Admin)
 export const getAllPatients = async (req, res) => {
   try {
@@ -239,5 +192,47 @@ export const getNotifications = async (req, res) => {
   } catch (error) {
     console.error('Error in getNotifications:', error);
     handleError(res, error);
+  }
+};
+
+//Get All Consultations by Logged-In Patient
+export const getConsultations = async (req, res) => {
+  try {
+    // Fetch consultations for a specific patient and populate their profilePhoto
+    const consultations = await Consultation.find({ userId: req.params.userId })
+      .populate('userId', 'profilePhoto'); // Populate only the profilePhoto field
+
+    if (!consultations) {
+      return res.status(404).json({ message: 'No consultations found for this patient' });
+    }
+
+    res.status(200).json(consultations);
+  } catch (error) {
+    console.error('Error fetching consultations:', error);
+    res.status(500).json({
+      message: 'Failed to fetch consultations',
+      error: error.message
+    });
+  }
+};
+
+// Cancel a Consultation (by Patient)
+export const cancelConsultation = async (req, res) => {
+  try {
+    const consultation = await Consultation.findById(req.params.id);
+
+    if (!consultation) {
+      return res.status(404).json({ message: 'Consultation not found' });
+    }
+
+    if (consultation.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'You are not allowed to cancel this consultation' });
+    }
+
+    await Consultation.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: 'Consultation cancelled' });
+  } catch (err) {
+    console.error('Error cancelling consultation:', err);
+    res.status(500).json({ error: err.message });
   }
 };

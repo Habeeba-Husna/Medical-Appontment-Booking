@@ -42,13 +42,13 @@ const QuickActions = () => {
           icon={<Clock className="h-6 w-6" />}
           title="Appointment History"
           description="View past consultations"
-          onClick={() => navigate('/appointment-history')}
+          onClick={() => navigate('/appointments')}
         />
         <ActionCard
           icon={<FileText className="h-6 w-6" />}
           title="Medical Records"
           description="Access your health data"
-          onClick={() => navigate('/medical-records')}
+          onClick={() => navigate('/records')}
         />
         <ActionCard
           icon={<MessageSquare className="h-6 w-6" />}

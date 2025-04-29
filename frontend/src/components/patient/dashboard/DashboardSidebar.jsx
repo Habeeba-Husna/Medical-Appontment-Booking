@@ -41,49 +41,49 @@ function DashboardSidebar({ isOpen }) {
     )}>
       <div className="px-3 py-4">
         <div className="mb-8 flex items-center justify-center">
-          <Link to="/dashboard1" className="flex items-center space-x-2">
+          <Link to="/patient/dashboard" className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-medical-secondary">
-              HealthHarbor
+            HealWise
             </span>
           </Link>
         </div>
 
         <nav className="space-y-1 px-2">
           <SidebarLink
-            href="/dashboard1"
+            href="/patient/dashboard"
             icon={<Home className="h-5 w-5" />}
             title="Dashboard"
-            isActive={isActive('/dashboard1')}
+            isActive={isActive('/patient/dashboard')}
           />
           <SidebarLink
-            href="/doctors"
+            href="/patient/doctors"
             icon={<Stethoscope className="h-5 w-5" />}
             title="Find Doctors"
-            isActive={isActive('/doctors')}
+            isActive={isActive('/patient/doctors')}
           />
           <SidebarLink
-            href="/appointments"
+            href="/patient/appointments"
             icon={<CalendarDays className="h-5 w-5" />}
             title="Appointments"
-            isActive={isActive('/appointments')}
+            isActive={isActive('/patient/appointments')}
           />
           <SidebarLink
-            href="/medical-records"
+            href="/patient/records"
             icon={<FileText className="h-5 w-5" />}
             title="Medical Records"
-            isActive={isActive('/medical-records')}
+            isActive={isActive('/patient/records')}
           />
           <SidebarLink
-            href="/appointment-history"
+            href="/patient/payments"
             icon={<Clock className="h-5 w-5" />}
-            title="History"
-            isActive={isActive('/appointment-history')}
+            title="Payments"
+            isActive={isActive('/patient/payments')}
           />
           <SidebarLink
-            href="/profile"
+            href="/patient/profile"
             icon={<UserCircle className="h-5 w-5" />}
             title="Profile"
-            isActive={isActive('/profile')}
+            isActive={isActive('/patient/profile')}
           />
         </nav>
       </div>

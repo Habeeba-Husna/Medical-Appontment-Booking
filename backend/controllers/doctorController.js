@@ -122,6 +122,40 @@ export const getDoctorById = asyncHandler(async (req, res) => {
   }
 });
 
+// export const getDoctorById = asyncHandler(async (req, res) => {
+//   try {
+//     // Validate ID format
+//     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+//       return res.status(400).json({ 
+//         success: false,
+//         message: 'Invalid doctor ID format' 
+//       });
+//     }
+
+//     const doctor = await Doctor.findById(req.params.id)
+//       .select('-password -tokens')
+//       .lean();
+
+//     if (!doctor) {
+//       return res.status(404).json({ 
+//         success: false,
+//         message: 'Doctor not found' 
+//       });
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       data: doctor
+//     });
+//   } catch (error) {
+//     console.error('Error fetching doctor:', error);
+//     res.status(500).json({
+//       success: false,
+//       message: 'Server error while fetching doctor'
+//     });
+//   }
+// });
+
 // Get single doctor with rating & next slot
 export const getSingleDoctorWithDetails = async (req, res) => {
   try {

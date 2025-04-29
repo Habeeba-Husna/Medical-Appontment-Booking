@@ -16,9 +16,9 @@ export const ENDPOINTS = {
   },
     PATIENT: {
       DOCTORS: '/patient/doctors', // Updated path if you want to fetch doctors via patient route
-      SINGLE_DOCTOR: (id) => `/patient/${id}`,
+      // SINGLE_DOCTOR: (id) => `/doctor/${id}`,
       SINGLE_DOCTOR_DETAILS: (id) => `/patient/${id}/details`,
-      BOOK_APPOINTMENT: '/appointments/appointments/book',
+      BOOK_APPOINTMENT: '/appointments/book',
       RESCHEDULE_APPOINTMENT: (id) => `/appointments/reschedule/${id}`,
       CANCEL_APPOINTMENT: (id) => `/appointments/${id}/cancel`,
       GET_APPOINTMENTS: '/appointments/appointments',
@@ -38,11 +38,12 @@ export const ENDPOINTS = {
       // CANCEL_APPOINTMENT: '/patient/appointments/cancel',
       // NOTIFICATIONS: '/patient/notifications',
     },
-  // DOCTOR: {
-  //   PROFILE: "/doctor/profile",
-  //   UPDATE_PROFILE: "/doctor/profile",
+  DOCTOR: {
+    SINGLE_DOCTOR: (id) => `/doctor/${id}`,
+    // PROFILE: "/doctor/profile",
+    // UPDATE_PROFILE: "/doctor/profile",
     
-  // },
+  },
 
   ADMIN: {
     // Doctor Management

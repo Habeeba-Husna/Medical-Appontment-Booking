@@ -191,6 +191,12 @@ export const createAppointment = async (req, res) => {
     const { doctorId, date, time } = req.body;
     const patientId = req.patient?._id || req.user?.id;
 
+ // Validate inputs
+ if (!doctorId || !date || !time || !patientId) {
+  return res.status(400).json({ 
+    message: 'Doctor ID, date, time, and patient ID are required' 
+  });
+}
 
 // Check doctor availability
 const isAvailable = await checkDoctorAvailability(doctorId, date, time);
@@ -198,12 +204,7 @@ if (!isAvailable) {
   return res.status(409).json({ message: 'Doctor not available at this time' });
 }
 
-    // Validate inputs
-    if (!doctorId || !date || !time || !patientId) {
-      return res.status(400).json({ 
-        message: 'Doctor ID, date, time, and patient ID are required' 
-      });
-    }
+   
 
     // Validate appointment time is in the future
     if (!isValidAppointmentTime(date, time)) {
@@ -239,7 +240,7 @@ if (!isAvailable) {
       patientId,
       date,
       time,
-      status: 'Confirmed' // Default to confirmed
+      status: 'pending' // Default to confirmed
     });
 
     await newAppointment.save();
@@ -285,6 +286,31 @@ await sendNotification(
   }
 };
 
+export const confirmAppointment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { paymentId } = req.body;
+
+    const appointment = await Appointment.findByIdAndUpdate(
+      id,
+      { 
+        status: 'confirmed',
+        paymentId 
+      },
+      { new: true }
+    ).populate('doctorId patientId');
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
+
+    res.status(200).json(appointment);
+  } catch (error) {
+    res.status(500).json({ 
+      message: error.message || 'Failed to confirm appointment' 
+    });
+  }
+};
 export const getAllAppointments = async (req, res) => {
   try {
     const patientId = req.user?.id || req.patient?._id;
@@ -341,7 +367,7 @@ export const updateAppointmentStatus = async (req, res) => {
     const { status } = req.body;
     const { id } = req.params;
     
-    const validStatuses = ['Pending', 'Confirmed', 'Completed', 'Cancelled'];
+    const validStatuses = ['pending', 'confirmed', 'completed', 'cancelled'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ message: 'Invalid status' });
     }
@@ -400,7 +426,7 @@ export const cancelAppointment = async (req, res) => {
       return res.status(404).json({ message: 'Appointment not found' });
     }
 
-    if (appointment.status === 'Cancelled') {
+    if (appointment.status === 'cancelled') {
       return res.status(400).json({ message: 'Appointment already cancelled' });
     }
 
@@ -414,15 +440,21 @@ export const cancelAppointment = async (req, res) => {
       });
     }
 
-    appointment.status = 'Cancelled';
+    appointment.status = 'cancelled';
     const updatedAppointment = await appointment.save();
 
+    try{
     // Send cancellation email
     await sendNotification(
       req.user.email,
       'Appointment Cancelled',
       `Your appointment with Dr. ${appointment.doctorId.fullName} has been cancelled`
     );
+
+  } catch (emailError) {
+    console.error('Email Notification Error:', emailError);
+    // Continue with the response even if email fails
+  }
 
     res.status(200).json({ 
       message: 'Appointment cancelled successfully',
@@ -473,7 +505,7 @@ export const rescheduleAppointment = async (req, res) => {
       doctorId: appointment.doctorId,
       date: newDate,
       time: newTime,
-      status: { $in: ['Pending', 'Confirmed'] },
+      status: { $in: ['pending', 'confirmed'] },
       _id: { $ne: id }, // Ensure we're not checking the same appointment
     });
 
@@ -486,7 +518,7 @@ export const rescheduleAppointment = async (req, res) => {
     // Update the appointment with new date and time
     appointment.date = newDate;
     appointment.time = newTime;
-    appointment.status = 'Confirmed'; // Reset to confirmed
+    appointment.status = 'confirmed'; // Reset to confirmed
     await appointment.save();
 
     await sendNotification(
